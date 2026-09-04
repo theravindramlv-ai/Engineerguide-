@@ -1,0 +1,339 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-canvas: #07090e;
+  --color-canvas-elevated: #0e131f;
+  --color-ink: #f8fafc;
+  --color-body: #94a3b8;
+  --color-mute: #64748b;
+  --color-faint: #475569;
+  --color-hairline: rgba(255, 255, 255, 0.08);
+  --color-hairline-soft: rgba(255, 255, 255, 0.05);
+  --color-link: #38bdf8;
+  --color-link-deep: #0284c7;
+  --color-link-soft: rgba(56, 189, 248, 0.15);
+  --color-accent-cyan: #38bdf8;
+  --color-accent-violet: #6366f1;
+  --color-accent-pink: #ec4899;
+  --color-accent-amber: #f59e0b;
+
+  --font-sans: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', Menlo, Consolas, monospace;
+}
+
+:root, html.dark {
+  --bg-primary: #07090e;
+  --bg-surface: #0e131f;
+  --bg-surface-elevated: #151c2e;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #38bdf8;
+  --accent-indigo: #6366f1;
+  --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(56, 189, 248, 0.35);
+  --grid-pattern-color: rgba(56, 189, 248, 0.04);
+  color-scheme: dark;
+}
+
+html:not(.dark), html.light {
+  --bg-primary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent-blue: #0284c7;
+  --accent-indigo: #4f46e5;
+  --accent-gradient: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
+  --border-subtle: rgba(15, 23, 42, 0.1);
+  --border-hover: rgba(2, 132, 199, 0.4);
+  --grid-pattern-color: rgba(2, 132, 199, 0.06);
+  color-scheme: light;
+}
+
+/* ─── BASE TYPOGRAPHY & LAYOUT ─── */
+html {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em;
+}
+
+/* Subtle custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ─── SUBTLE GRID / DOT PATTERN ─── */
+.bg-grid-subtle {
+  background-image: radial-gradient(var(--grid-pattern-color) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ─── HERO AMBIENT RADIAL GLOW ─── */
+.hero-radial-glow {
+  background: radial-gradient(circle at 50% 15%, rgba(56, 189, 248, 0.15) 0%, rgba(99, 102, 241, 0.08) 35%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ─── ACCENT TEXT GRADIENT ─── */
+.text-gradient-accent {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── ELEGANT DEVELOPER CARDS ─── */
+.hairline-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hairline-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 10px 30px -4px rgba(56, 189, 248, 0.12);
+  transform: translateY(-2px);
+}
+
+/* ─── BRANCH CARD ─── */
+.branch-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.2s ease;
+}
+.branch-card:hover {
+  border-color: var(--border-hover);
+  background-color: var(--bg-surface-elevated);
+  box-shadow: 0 10px 30px -4px rgba(56, 189, 248, 0.14);
+  transform: translateY(-2px);
+}
+.branch-card:active {
+  transform: translateY(0);
+}
+
+/* ─── PREFERS-REDUCED-MOTION ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── NODE PULSE BADGE ─── */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.04); }
+}
+.pulse-subtle {
+  animation: pulse-subtle 2.5s infinite ease-in-out;
+}
+
+/* ─── ROADMAP SPINE ANIMATION (vertical line drawing down) ─── */
+@keyframes draw-spine {
+  from { height: 0; opacity: 0; }
+  to   { height: 100%; opacity: 1; }
+}
+.roadmap-spine {
+  animation: draw-spine 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top center;
+}
+
+/* ─── NODE APPEAR ANIMATION (staggered fade-up) ─── */
+@keyframes node-appear {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.roadmap-node-appear {
+  animation: node-appear 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.roadmap-node-appear:nth-child(1) { animation-delay: 0.1s; }
+.roadmap-node-appear:nth-child(2) { animation-delay: 0.25s; }
+.roadmap-node-appear:nth-child(3) { animation-delay: 0.4s; }
+.roadmap-node-appear:nth-child(4) { animation-delay: 0.55s; }
+.roadmap-node-appear:nth-child(5) { animation-delay: 0.7s; }
+
+/* ─── STAGE CONNECTOR (dashed animated line between stages) ─── */
+@keyframes dash-flow {
+  to { stroke-dashoffset: 0; }
+}
+.stage-connector {
+  stroke-dasharray: 8 4;
+  stroke-dashoffset: 120;
+  animation: dash-flow 1s linear forwards;
+}
+
+/* ─── CATEGORY TAB ─── */
+.category-tab {
+  background: #ffffff;
+  color: #4d4d4d;
+  border: 1px solid #ebebeb;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.category-tab:hover {
+  border-color: #a1a1a1;
+}
+.category-tab.active {
+  background: #171717;
+  color: #ffffff;
+  border-color: #171717;
+}
+
+html.dark .category-tab {
+  background: #121215;
+  color: #a1a1aa;
+  border-color: #27272a;
+}
+html.dark .category-tab:hover {
+  border-color: #52525b;
+  color: #f4f4f5;
+}
+html.dark .category-tab.active {
+  background: #f4f4f5;
+  color: #09090b;
+  border-color: #f4f4f5;
+}
+
+/* ─── BRANCH CARD EMOJI BOUNCE ─── */
+@keyframes emoji-bounce {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  30%       { transform: scale(1.15) rotate(-5deg); }
+  60%       { transform: scale(1.1) rotate(4deg); }
+}
+.branch-emoji-hover:hover {
+  animation: emoji-bounce 0.5s ease-in-out;
+}
+
+/* ─── FADE-IN FOR PAGE SECTIONS ─── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.fade-in-up-1 { animation-delay: 0.05s; }
+.fade-in-up-2 { animation-delay: 0.15s; }
+.fade-in-up-3 { animation-delay: 0.25s; }
+.fade-in-up-4 { animation-delay: 0.35s; }
+
+/* ─── FILMY AESTHETIC SUBTITLE & CINEMATIC ANIMATIONS ─── */
+.font-filmy {
+  font-family: var(--font-serif);
+  font-style: italic;
+  letter-spacing: 0.02em;
+  font-weight: 400;
+}
+
+@keyframes filmy-entrance {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(12px) scale(0.98);
+  }
+  60% {
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes filmy-ambient {
+  0%, 100% {
+    opacity: 0.88;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1.5px);
+  }
+}
+
+.filmy-subtitle-anim {
+  animation: filmy-entrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both,
+             filmy-ambient 6s ease-in-out infinite 1.4s;
+  will-change: transform, opacity, filter;
+}
+
+/* ─── STAGE EXPAND/COLLAPSE ─── */
+.stage-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+  opacity: 0;
+}
+.stage-body.open {
+  max-height: 600px;
+  opacity: 1;
+}
+
+/* Dark mode overview stage body overrides */
+html.dark .overview-hero {
+  background-color: #0c0c0e !important;
+}
+html.dark .overview-stage-header {
+  background-color: #121215 !important;
+  border-color: #27272a !important;
+}
+html.dark .overview-stage-header:hover {
+  border-color: #3f3f46 !important;
+}
+html.dark .overview-stage-body {
+  background-color: #121215 !important;
+  border-color: #27272a !important;
+}
+html.dark .overview-stage-num {
+  background-color: #18181b !important;
+}
+
+/* ─── PROGRESS BAR ─── */
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+.progress-bar-fill {
+  animation: progress-fill 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}

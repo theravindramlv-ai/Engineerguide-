@@ -1,0 +1,88 @@
+---
+// src/pages/404.astro
+// Custom SEO-friendly 404 page with high-value internal links
+import Layout from '../layouts/Layout.astro';
+import { allRoadmaps } from '../data/roadmaps';
+
+const popularRoadmaps = allRoadmaps.slice(0, 4);
+---
+
+<Layout
+  title="Page Not Found (404) | EngineerGuide"
+  description="The engineering roadmap or resource you requested could not be found. Explore our 26 engineering disciplines, free canonical resources, or portfolio projects."
+  noindex={true}
+>
+  <div class="relative overflow-hidden bg-[var(--bg-primary)] py-20 sm:py-32 bg-grid-subtle transition-colors flex-1 flex items-center justify-center">
+    <div class="hero-radial-glow absolute inset-0 -top-24 h-[600px] w-full pointer-events-none"></div>
+
+    <div class="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+      <!-- 404 badge -->
+      <div class="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 px-4 py-1.5 text-xs font-mono font-medium text-sky-600 dark:text-sky-400 mb-6 shadow-xs">
+        <span class="flex h-2 w-2 rounded-full bg-amber-500 animate-ping"></span>
+        <span class="tracking-wider uppercase">HTTP 404 · Route Not Located</span>
+      </div>
+
+      <h1 class="font-sans text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white mb-4">
+        Engineering Path Not Found
+      </h1>
+
+      <p class="mx-auto max-w-xl text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-10 leading-relaxed">
+        The page you are looking for may have moved or no longer exists. Use the direct links below to get back on track with your engineering journey.
+      </p>
+
+      <!-- Primary Action Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-4 mb-14">
+        <a
+          href="/"
+          class="rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-6 py-3 font-sans text-sm font-semibold text-white shadow-md shadow-sky-500/20 hover:opacity-95 transition-all no-underline"
+        >
+          Return to Homepage
+        </a>
+        <a
+          href="/roadmaps"
+          class="rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-6 py-3 font-sans text-sm font-semibold text-slate-900 dark:text-white hover:bg-black/10 dark:hover:bg-white/10 transition-all no-underline"
+        >
+          Explore All Roadmaps
+        </a>
+        <a
+          href="/resources"
+          class="rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-6 py-3 font-sans text-sm font-semibold text-slate-900 dark:text-white hover:bg-black/10 dark:hover:bg-white/10 transition-all no-underline"
+        >
+          Free Learning Resources
+        </a>
+        <a
+          href="/projects"
+          class="rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-6 py-3 font-sans text-sm font-semibold text-slate-900 dark:text-white hover:bg-black/10 dark:hover:bg-white/10 transition-all no-underline"
+        >
+          Portfolio Projects
+        </a>
+      </div>
+
+      <!-- Quick Directory of Flagship Roadmaps -->
+      <div class="border-t border-black/8 dark:border-white/8 pt-10 text-left">
+        <div class="font-mono text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4 text-center">
+          Popular Engineering Roadmaps
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {popularRoadmaps.map((r) => (
+            <a
+              href={`/roadmaps/${r.slug}`}
+              class="flex items-center gap-3 p-4 rounded-xl border border-black/8 dark:border-white/8 bg-white/60 dark:bg-white/5 hover:border-sky-500/40 transition-all no-underline group"
+            >
+              <span class="text-2xl">{r.icon}</span>
+              <div class="min-w-0 flex-1">
+                <div class="font-sans text-sm font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors truncate">
+                  {r.title}
+                </div>
+                <div class="font-mono text-xs text-slate-500 dark:text-slate-400">
+                  {r.estimatedWeeks} Weeks · {r.totalHours} Hours
+                </div>
+              </div>
+              <span class="font-mono text-xs text-slate-400 group-hover:text-sky-500 transition-colors">→</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

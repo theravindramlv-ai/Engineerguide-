@@ -1,0 +1,180 @@
+---
+import Navbar from '../components/layout/Navbar.astro';
+import Footer from '../components/layout/Footer.astro';
+import AIPersonalizerModal from '../components/ai/AIPersonalizerModal.astro';
+import SEO, { type BreadcrumbItem, type FAQItem } from '../components/seo/SEO.astro';
+import '../styles/global.css';
+import { getLangFromUrl, getHreflangLinks } from '../i18n/utils';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  noindex?: boolean;
+  type?: 'website' | 'article';
+  ogImage?: string;
+  breadcrumbs?: BreadcrumbItem[];
+  faqs?: FAQItem[];
+  articleData?: {
+    publishedTime?: string;
+    modifiedTime?: string;
+    authors?: string[];
+    section?: string;
+    tags?: string[];
+  };
+  lang?: Lang;
+}
+
+const { 
+  title = "Engineering Roadmaps for Students & Developers | EngineerGuide",
+  description = "Explore structured engineering roadmaps, foundational programming guides, free learning resources, and portfolio project ideas to become industry ready.",
+  canonical,
+  noindex = false,
+  type = 'website',
+  ogImage = 'https://engineerguide.com/og-image.png',
+  breadcrumbs,
+  faqs,
+  articleData,
+  lang: propLang
+} = Astro.props;
+
+const currentLang = propLang || getLangFromUrl(Astro.url);
+const siteUrl = 'https://engineerguide.com';
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+const canonicalUrl = canonical || `${siteUrl}${pathname === '/' ? '' : pathname}`;
+const hreflangs = getHreflangLinks(Astro.url.pathname, siteUrl);
+
+const ogLocales: Record<string, string> = {
+  en: 'en_US',
+  es: 'es_ES',
+  ja: 'ja_JP',
+  fr: 'fr_FR',
+  de: 'de_DE',
+  pt: 'pt_PT',
+  ko: 'ko_KR',
+  it: 'it_IT',
+};
+---
+
+<!doctype html>
+<html lang={currentLang} dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Centralized SEO Engine -->
+    <SEO
+      title={title}
+      description={description}
+      canonical={canonicalUrl}
+      noindex={noindex}
+      type={type}
+      ogImage={ogImage}
+      breadcrumbs={breadcrumbs}
+      faqs={faqs}
+      articleData={articleData}
+    />
+
+    <!-- Localized og:locale -->
+    <meta property="og:locale" content={ogLocales[currentLang] || 'en_US'} />
+
+    <!-- Google Fonts for Manrope, Inter and JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- Anti-FOUT Theme Initializer Script (Defaults to dark navy developer theme) -->
+    <script is:inline>
+      (function() {
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        }
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-sans antialiased flex flex-col selection:bg-sky-500/20 selection:text-sky-300 transition-colors duration-200">
+    <Navbar />
+    
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <AIPersonalizerModal />
+
+    <!-- Global Client Interactive Scripts -->
+    <script>
+      // 1. Dark Mode Theme Toggle Management
+      function setupThemeToggle() {
+        const toggleBtns = document.querySelectorAll('.theme-toggle-btn');
+        
+        function applyTheme(isDark: boolean) {
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
+            localStorage.setItem('theme', 'light');
+          }
+
+          toggleBtns.forEach(btn => {
+            btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+            btn.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+          });
+        }
+
+        toggleBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const isCurrentlyDark = document.documentElement.classList.contains('dark');
+            applyTheme(!isCurrentlyDark);
+          });
+        });
+      }
+
+      // 2. Mobile Navigation Drawer Toggle Management
+      function setupMobileNav() {
+        const mobileToggle = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu-drawer');
+        const mobileClose = document.getElementById('mobile-menu-close');
+
+        if (!mobileToggle || !mobileMenu) return;
+
+        function openMenu() {
+          mobileMenu?.classList.remove('hidden');
+          mobileMenu?.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+          mobileMenu?.classList.add('hidden');
+          mobileMenu?.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        }
+
+        mobileToggle.addEventListener('click', openMenu);
+        mobileClose?.addEventListener('click', closeMenu);
+
+        mobileMenu.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', closeMenu);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        setupThemeToggle();
+        setupMobileNav();
+      });
+    </script>
+  </body>
+</html>

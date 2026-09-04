@@ -1,0 +1,307 @@
+---
+import { allBranches } from '../../data/branches';
+import LanguagePicker from './LanguagePicker.astro';
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '../../i18n/utils';
+
+const currentLang = getLangFromUrl(Astro.url);
+const t = useTranslations(currentLang);
+const translatePath = useTranslatedPath(currentLang);
+
+const techBranches = allBranches.filter(b => b.category === 'technology');
+const tradBranches = allBranches.filter(b => b.category === 'traditional');
+const emergBranches = allBranches.filter(b => b.category === 'emerging');
+---
+
+<header class="sticky top-0 z-50 w-full border-b border-black/8 dark:border-white/8 bg-white/85 dark:bg-[#07090e]/85 backdrop-blur-md transition-colors">
+  <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <!-- Brand -->
+    <div class="flex items-center gap-8">
+      <a href={translatePath('/')} class="group flex items-center gap-2.5 no-underline">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white border border-black/10 dark:border-white/15 font-mono text-sm font-semibold tracking-tighter shadow-xs transition-transform group-hover:scale-105">
+          EG
+        </div>
+        <div class="flex flex-col">
+          <span class="font-sans text-base font-bold tracking-tight text-slate-950 dark:text-white">
+            Engineer<span class="text-sky-600 dark:text-sky-400">guide</span>
+          </span>
+          <span class="font-mono text-[9px] tracking-widest uppercase text-slate-500 dark:text-slate-400 -mt-1 font-medium">
+            ENGINEERGUIDE.COM
+          </span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-600 dark:text-slate-300">
+        <div class="relative group">
+          <a 
+            href={translatePath('/roadmaps')} 
+            class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer no-underline"
+          >
+            <span>{t('nav.roadmaps')}</span>
+            <span class="rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-1.5 py-0.2 font-mono text-[10px] font-semibold">26</span>
+            <svg class="w-3.5 h-3.5 text-slate-400 dark:text-slate-400 group-hover:text-slate-950 dark:group-hover:text-white transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </a>
+
+          <!-- Mega-Menu Dropdown for All 26 Branches -->
+          <div class="absolute -left-12 lg:left-0 top-full mt-2 hidden group-hover:block w-[820px] max-w-[92vw] max-h-[82vh] overflow-y-auto rounded-2xl bg-white dark:bg-[#0e131f] p-5 shadow-2xl border border-black/10 dark:border-white/10 transition-all z-50">
+            <!-- Header Bar inside Dropdown -->
+            <div class="flex items-center justify-between pb-3.5 mb-3.5 border-b border-black/10 dark:border-white/10">
+              <div>
+                <div class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">Curriculums & Paths</div>
+                <div class="text-sm font-bold text-slate-950 dark:text-white">All 26 Engineering Roadmaps</div>
+              </div>
+              <a 
+                href="/roadmaps" 
+                class="inline-flex items-center gap-1 font-mono text-xs text-sky-600 dark:text-sky-400 hover:underline font-medium"
+              >
+                <span>Full Directory & Search</span>
+                <span>→</span>
+              </a>
+            </div>
+
+            <!-- 3 Category Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <!-- Col 1: Technology -->
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-1.5 pb-1 border-b border-black/10 dark:border-white/10 font-mono text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+                  <span>💻</span>
+                  <span>Technology ({techBranches.length})</span>
+                </div>
+                <div class="space-y-0.5">
+                  {techBranches.map((b) => {
+                    const href = b.hasFullRoadmap ? `/roadmaps/${b.fullRoadmapSlug}` : `/roadmaps/overview/${b.slug}`;
+                    return (
+                      <a 
+                        href={href}
+                        class="flex items-center justify-between gap-1.5 rounded-lg px-2 py-1.5 text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-colors no-underline group/item"
+                      >
+                        <span class="flex items-center gap-2 truncate text-slate-700 dark:text-slate-300 group-hover/item:text-slate-950 dark:group-hover/item:text-white font-medium">
+                          <span class="text-sm shrink-0">{b.emoji}</span>
+                          <span class="truncate">{b.name}</span>
+                        </span>
+                        {b.hasFullRoadmap && (
+                          <span class="shrink-0 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 px-1.5 py-0.2 font-mono text-[9px] font-semibold">
+                            Full
+                          </span>
+                        )}
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <!-- Col 2: Traditional -->
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-1.5 pb-1 border-b border-black/10 dark:border-white/10 font-mono text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                  <span>⚙️</span>
+                  <span>Traditional ({tradBranches.length})</span>
+                </div>
+                <div class="space-y-0.5">
+                  {tradBranches.map((b) => {
+                    const href = b.hasFullRoadmap ? `/roadmaps/${b.fullRoadmapSlug}` : `/roadmaps/overview/${b.slug}`;
+                    return (
+                      <a 
+                        href={href}
+                        class="flex items-center justify-between gap-1.5 rounded-lg px-2 py-1.5 text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-colors no-underline group/item"
+                      >
+                        <span class="flex items-center gap-2 truncate text-slate-700 dark:text-slate-300 group-hover/item:text-slate-950 dark:group-hover/item:text-white font-medium">
+                          <span class="text-sm shrink-0">{b.emoji}</span>
+                          <span class="truncate">{b.name}</span>
+                        </span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <!-- Col 3: Emerging -->
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-1.5 pb-1 border-b border-black/10 dark:border-white/10 font-mono text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                  <span>🌱</span>
+                  <span>Emerging ({emergBranches.length})</span>
+                </div>
+                <div class="space-y-0.5">
+                  {emergBranches.map((b) => {
+                    const href = b.hasFullRoadmap ? `/roadmaps/${b.fullRoadmapSlug}` : `/roadmaps/overview/${b.slug}`;
+                    return (
+                      <a 
+                        href={href}
+                        class="flex items-center justify-between gap-1.5 rounded-lg px-2 py-1.5 text-xs hover:bg-black/5 dark:hover:bg-white/5 transition-colors no-underline group/item"
+                      >
+                        <span class="flex items-center gap-2 truncate text-slate-700 dark:text-slate-300 group-hover/item:text-slate-950 dark:group-hover/item:text-white font-medium">
+                          <span class="text-sm shrink-0">{b.emoji}</span>
+                          <span class="truncate">{b.name}</span>
+                        </span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Strip inside Dropdown -->
+            <div class="mt-4 pt-3 border-t border-black/10 dark:border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="flex h-2 w-2 rounded-full bg-sky-500"></span>
+                <span>All 26 roadmaps 100% free with vetted canonical resources</span>
+              </div>
+              <a 
+                href="/#branches" 
+                class="font-mono text-[11px] font-semibold text-sky-600 dark:text-sky-400 hover:underline transition-colors"
+              >
+                Browse All Branches →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <a href={translatePath('/resources')} class="px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors no-underline">
+          Resources
+        </a>
+        <a href={translatePath('/projects')} class="px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors no-underline">
+          Projects
+        </a>
+        <a href={translatePath('/#branches')} class="px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors no-underline">
+          {t('nav.branches')}
+        </a>
+        <a href={translatePath('/#faq')} class="px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors no-underline">
+          {t('nav.faq')}
+        </a>
+      </nav>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Language Selector -->
+      <LanguagePicker />
+
+      <!-- Dark / Light Mode Toggle Button -->
+      <button
+        type="button"
+        class="theme-toggle-btn flex h-9 w-9 items-center justify-center rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:border-black/20 dark:hover:border-white/20 transition-all cursor-pointer shadow-xs active:scale-95"
+        aria-label="Toggle theme"
+        title="Toggle theme"
+      >
+        <!-- Sun icon (shown when dark) -->
+        <svg class="h-4 w-4 hidden dark:block text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m14.14-14.14l-1.41 1.41"></path>
+        </svg>
+        <!-- Moon icon (shown when light) -->
+        <svg class="h-4 w-4 block dark:hidden text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+        </svg>
+      </button>
+
+      <!-- AI Personalizer trigger -->
+      <button 
+        id="open-personalizer-nav" 
+        type="button"
+        class="open-personalizer-trigger hidden sm:inline-flex items-center gap-2 rounded-lg border border-sky-500/30 bg-sky-500/10 px-3.5 py-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 hover:border-sky-500 transition-all cursor-pointer"
+      >
+        <svg class="h-3.5 w-3.5 text-sky-500 dark:text-sky-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span>{t('nav.aiPersonalize')}</span>
+      </button>
+
+      <!-- Start Learning CTA -->
+      <a 
+        href={translatePath('/roadmaps')} 
+        class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-sky-500 to-indigo-600 px-3.5 sm:px-4 py-1.5 text-xs font-semibold text-white hover:opacity-95 transition-all no-underline shadow-xs shadow-sky-500/20 active:scale-95"
+      >
+        <span>{t('nav.startLearning')}</span>
+        <span class="font-mono text-xs">→</span>
+      </a>
+
+      <!-- Mobile Hamburger Button -->
+      <button
+        id="mobile-menu-toggle-btn"
+        type="button"
+        class="md:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+      >
+        <svg id="hamburger-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <svg id="close-icon" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation Drawer -->
+  <div id="mobile-menu-drawer" class="hidden md:hidden border-t border-black/10 dark:border-white/10 bg-white dark:bg-[#07090e] px-4 pt-4 pb-6 space-y-4">
+    <div class="flex flex-col space-y-1 text-sm font-medium">
+      <a href={translatePath('/roadmaps')} class="rounded-lg px-3 py-2 text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 flex items-center justify-between no-underline">
+        <span>🗺️ {t('nav.roadmaps')} (26)</span>
+        <span class="font-mono text-xs text-sky-600 dark:text-sky-400">Directory →</span>
+      </a>
+      <a href={translatePath('/resources')} class="rounded-lg px-3 py-2 text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 no-underline">
+        📚 Free Resources
+      </a>
+      <a href={translatePath('/projects')} class="rounded-lg px-3 py-2 text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 no-underline">
+        🛠️ Portfolio Projects
+      </a>
+      <a href={translatePath('/#branches')} class="rounded-lg px-3 py-2 text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 no-underline">
+        🏛️ {t('nav.branches')}
+      </a>
+      <a href={translatePath('/#faq')} class="rounded-lg px-3 py-2 text-slate-700 dark:text-slate-200 hover:bg-black/5 dark:hover:bg-white/5 no-underline">
+        ❓ {t('nav.faq')}
+      </a>
+    </div>
+
+    <div class="pt-3 border-t border-black/10 dark:border-white/10 flex flex-col gap-2.5">
+      <div class="flex items-center justify-between px-1">
+        <span class="text-xs font-mono text-slate-500">Language / Idioma / 言語:</span>
+        <LanguagePicker dropdownAlign="left" />
+      </div>
+      <button 
+        type="button"
+        class="open-personalizer-trigger w-full flex items-center justify-center gap-2 rounded-lg border border-sky-500/30 bg-sky-500/10 py-2.5 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 transition-all cursor-pointer"
+      >
+        <svg class="h-4 w-4 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span>{t('nav.aiPersonalize')}</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Mobile menu toggle logic
+  const menuToggleBtn = document.getElementById('mobile-menu-toggle-btn');
+  const menuDrawer = document.getElementById('mobile-menu-drawer');
+  const hamburgerIcon = document.getElementById('hamburger-icon');
+  const closeIcon = document.getElementById('close-icon');
+
+  menuToggleBtn?.addEventListener('click', () => {
+    const isOpen = !menuDrawer?.classList.contains('hidden');
+    if (isOpen) {
+      menuDrawer?.classList.add('hidden');
+      hamburgerIcon?.classList.remove('hidden');
+      closeIcon?.classList.add('hidden');
+      menuToggleBtn.setAttribute('aria-expanded', 'false');
+    } else {
+      menuDrawer?.classList.remove('hidden');
+      hamburgerIcon?.classList.add('hidden');
+      closeIcon?.classList.remove('hidden');
+      menuToggleBtn.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  // Close drawer on link clicks
+  menuDrawer?.querySelectorAll('a, button').forEach(link => {
+    link.addEventListener('click', () => {
+      menuDrawer?.classList.add('hidden');
+      hamburgerIcon?.classList.remove('hidden');
+      closeIcon?.classList.add('hidden');
+      menuToggleBtn?.setAttribute('aria-expanded', 'false');
+    });
+  });
+</script>

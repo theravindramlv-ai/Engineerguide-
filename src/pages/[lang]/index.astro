@@ -1,0 +1,778 @@
+---
+// src/pages/[lang]/index.astro
+// Dynamic multi-language homepage for Español, 日本語, Français, Deutsch, Português, 한국어, Italiano
+import Layout from '../../layouts/Layout.astro';
+import { allBranches } from '../../data/branches';
+import { allRoadmaps } from '../../data/roadmaps';
+import { faqsByLang } from '../../i18n/faqs';
+import { useTranslations, useTranslatedPath } from '../../i18n/utils';
+import type { Lang } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  const nonDefaultLocales: Lang[] = ['es', 'ja', 'fr', 'de', 'pt', 'ko', 'it'];
+  return nonDefaultLocales.map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params as { lang: Lang };
+const t = useTranslations(lang);
+const translatePath = useTranslatedPath(lang);
+
+const categories = [
+  { id: 'all', label: t('branches.catAll'), count: allBranches.length },
+  { id: 'technology', label: t('branches.catTech'), count: allBranches.filter(b => b.category === 'technology').length },
+  { id: 'traditional', label: t('branches.catTrad'), count: allBranches.filter(b => b.category === 'traditional').length },
+  { id: 'emerging', label: t('branches.catEmerg'), count: allBranches.filter(b => b.category === 'emerging').length },
+];
+
+const faqs = faqsByLang[lang] || faqsByLang['en'];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title={t('site.title')}
+  description={t('site.description')}
+  lang={lang}
+>
+  <!-- Localized FAQPage JSON-LD Structured Data for Search Engine Rich Snippets -->
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <!-- 1. Hero Section (Two-Column Desktop / Responsive Stack) -->
+  <section class="relative overflow-hidden border-b border-black/8 dark:border-white/8 bg-[var(--bg-primary)] pt-12 pb-20 sm:pt-20 sm:pb-28 bg-grid-subtle transition-colors">
+    <!-- Ambient Radial Glow -->
+    <div class="hero-radial-glow absolute inset-0 -top-24 h-[700px] w-full"></div>
+
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        <!-- Left Column: Copy & Actions -->
+        <div class="lg:col-span-7 text-left">
+
+          <!-- Headline -->
+          <h1 class="font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12] mb-6">
+            {t('hero.title1')}<br class="hidden sm:inline" />
+            <span class="text-gradient-accent">{t('hero.titleAccent')}</span>
+          </h1>
+
+          <!-- Supporting Text -->
+          <p class="max-w-xl text-lg sm:text-xl text-slate-600 dark:text-slate-400 leading-relaxed font-normal mb-8">
+            {t('hero.subtitle')}
+          </p>
+
+          <!-- CTAs -->
+          <div class="flex flex-wrap items-center gap-4 mb-12">
+            <a
+              href="#branches"
+              class="rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-7 py-3.5 font-sans text-sm font-semibold text-white shadow-md shadow-sky-500/20 hover:opacity-95 transition-all active:scale-95 no-underline flex items-center gap-2"
+            >
+              <span>{t('hero.ctaExplore')}</span>
+              <span class="font-mono text-sm">→</span>
+            </a>
+            <button
+              id="open-personalizer-hero"
+              type="button"
+              class="open-personalizer-trigger rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-6 py-3.5 font-sans text-sm font-semibold text-slate-800 dark:text-slate-200 hover:border-black/20 dark:hover:border-white/20 hover:bg-black/10 dark:hover:bg-white/10 hover:text-black dark:hover:text-white transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+            >
+              <svg class="h-4 w-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>{t('hero.ctaHelp')}</span>
+            </button>
+          </div>
+
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-md">
+            Take a short practical assessment to discover your current engineering skills and find your highest-impact learning gaps.
+          </p>
+
+          <!-- Minimal Stats -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-black/8 dark:border-white/8">
+            <div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white">26</div>
+              <div class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">{t('hero.statBranches')}</div>
+            </div>
+            <div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white">100%</div>
+              <div class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">{t('hero.statResources')}</div>
+            </div>
+            <div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white">Beginner</div>
+              <div class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">{t('hero.statPaths')}</div>
+            </div>
+            <div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white">Real</div>
+              <div class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">{t('hero.statExperience')}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Sophisticated Roadmap Visualization Widget -->
+        <div class="lg:col-span-5 relative">
+          <div class="absolute -inset-4 rounded-3xl bg-gradient-to-r from-sky-500/15 via-indigo-500/10 to-transparent blur-2xl pointer-events-none"></div>
+
+          <div class="relative rounded-2xl border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0e131f]/90 p-6 backdrop-blur-xl shadow-xl dark:shadow-2xl">
+            <!-- Widget Header -->
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/10 dark:border-white/10">
+              <div class="flex items-center gap-2.5">
+                <div class="flex h-3 w-3 items-center justify-center">
+                  <span class="flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+                </div>
+                <span class="font-mono text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white">{t('widget.title')}</span>
+              </div>
+              <span class="font-mono text-[10px] text-sky-600 dark:text-sky-400 rounded-md bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 font-semibold">
+                {t('widget.live')}
+              </span>
+            </div>
+
+            <!-- Visual Stages Stream -->
+            <div class="space-y-3 relative">
+              <div class="absolute left-4 top-4 bottom-4 w-px bg-gradient-to-b from-sky-500 via-indigo-500 to-emerald-500 opacity-60"></div>
+
+              <!-- Node 1 -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-3 w-3 items-center justify-center rounded-full bg-sky-500 shadow-xs shadow-sky-500/50"></div>
+                <div class="flex-1 rounded-xl border border-black/8 dark:border-white/10 bg-black/5 dark:bg-white/5 p-3 hover:border-sky-500/40 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-900 dark:text-white">{t('widget.stage1')}</span>
+                    <span class="font-mono text-[9px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-semibold">OK</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{t('widget.stage1Desc')}</p>
+                </div>
+              </div>
+
+              <!-- Node 2 -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-3 w-3 items-center justify-center rounded-full bg-sky-500 shadow-xs shadow-sky-500/50"></div>
+                <div class="flex-1 rounded-xl border border-black/8 dark:border-white/10 bg-black/5 dark:bg-white/5 p-3 hover:border-sky-500/40 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-900 dark:text-white">{t('widget.stage2')}</span>
+                    <span class="font-mono text-[9px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-semibold">OK</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{t('widget.stage2Desc')}</p>
+                </div>
+              </div>
+
+              <!-- Node 3 -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-4 w-4 items-center justify-center rounded-full bg-sky-500 shadow-md shadow-sky-500 animate-pulse">
+                  <div class="h-1.5 w-1.5 rounded-full bg-white"></div>
+                </div>
+                <div class="flex-1 rounded-xl border border-sky-500/50 bg-sky-500/10 p-3 shadow-md shadow-sky-500/5">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <span>{t('widget.stage3')}</span>
+                      <span class="h-1.5 w-1.5 rounded-full bg-sky-500 dark:bg-sky-400 animate-ping"></span>
+                    </span>
+                    <span class="font-mono text-[9px] text-sky-600 dark:text-sky-400 bg-sky-500/20 px-1.5 py-0.2 rounded font-bold">In Progress</span>
+                  </div>
+                  <p class="text-[11px] text-slate-700 dark:text-slate-300 mt-0.5">{t('widget.stage3Desc')}</p>
+                </div>
+              </div>
+
+              <!-- Node 4 -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-slate-400 dark:bg-slate-600"></div>
+                <div class="flex-1 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 p-3 opacity-80 hover:opacity-100 transition-opacity">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-700 dark:text-slate-200">{t('widget.stage4')}</span>
+                    <span class="font-mono text-[9px] text-slate-500 dark:text-slate-400">Next</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{t('widget.stage4Desc')}</p>
+                </div>
+              </div>
+
+              <!-- Node 5 -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-slate-400 dark:bg-slate-600"></div>
+                <div class="flex-1 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 p-3 opacity-80 hover:opacity-100 transition-opacity">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-700 dark:text-slate-200">{t('widget.stage5')}</span>
+                    <span class="font-mono text-[9px] text-slate-500 dark:text-slate-400">Portfolio</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{t('widget.stage5Desc')}</p>
+                </div>
+              </div>
+
+              <!-- Node 6 -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-emerald-500"></div>
+                <div class="flex-1 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-emerald-700 dark:text-emerald-300">{t('widget.stage6')}</span>
+                    <span class="font-mono text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">Goal</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{t('widget.stage6Desc')}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Widget Footer Hint -->
+            <div class="mt-4 pt-3 border-t border-black/10 dark:border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
+              <span>{t('widget.hint')}</span>
+              <span class="text-sky-600 dark:text-sky-400">{t('widget.hintLink')}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Featured Full Roadmaps Section -->
+  <section class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-surface)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-12">
+        <div>
+          <span class="font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-1">{t('featured.badge')}</span>
+          <h2 class="font-sans text-3xl sm:text-4xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+            {t('featured.title')}
+          </h2>
+          <p class="mt-2 text-base text-slate-600 dark:text-slate-400 max-w-2xl">
+            {t('featured.subtitle')}
+          </p>
+        </div>
+        <a 
+          href={translatePath('/roadmaps')} 
+          class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 flex items-center gap-1 no-underline"
+        >
+          <span>{t('featured.viewAll')}</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {allRoadmaps.map((r) => {
+          const milestonesCount = r.phases.reduce((acc, p) => acc + p.nodes.length, 0);
+          return (
+            <div class="hairline-card p-6 flex flex-col justify-between group">
+              <div>
+                <div class="flex items-start justify-between gap-2 mb-4">
+                  <span class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2.5 py-0.5 rounded-md">
+                    {r.difficultyLevel}
+                  </span>
+                  <span class="font-mono text-xs text-slate-500 dark:text-slate-400">~{r.totalHours}h</span>
+                </div>
+
+                <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                  {r.title}
+                </h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">
+                  {r.description}
+                </p>
+              </div>
+
+              <div>
+                <div class="pt-4 border-t border-black/8 dark:border-white/8 flex items-center justify-between text-xs font-mono text-slate-500 dark:text-slate-400 mb-4">
+                  <span>{r.estimatedWeeks} Weeks</span>
+                  <span>{milestonesCount} Milestones</span>
+                </div>
+                <a
+                  href={translatePath(`/roadmaps/${r.slug}`)}
+                  class="w-full flex items-center justify-center gap-1.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 py-2.5 text-xs font-semibold text-slate-900 dark:text-white group-hover:bg-sky-500/10 group-hover:border-sky-500/30 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-all no-underline"
+                >
+                  <span>{t('featured.explore')}</span>
+                  <span class="group-hover:translate-x-1 transition-transform font-mono">→</span>
+                </a>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Why We're Better -->
+  <section id="why-better" class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-primary)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <span class="font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-2">{t('why.badge')}</span>
+        <h2 class="font-sans text-3xl sm:text-4xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+          {t('why.title')}
+        </h2>
+        <p class="mt-3 text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+          {t('why.subtitle')}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <!-- Left: Typical Roadmap -->
+        <div class="rounded-2xl border border-rose-500/20 bg-rose-500/5 dark:bg-rose-950/10 p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2.5 mb-6">
+              <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500/20 text-rose-500 dark:text-rose-400 font-mono text-sm font-bold">
+                ✕
+              </span>
+              <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white">{t('why.typicalTitle')}</h3>
+            </div>
+
+            <ul class="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span><strong>Unstructured Technology Lists:</strong> Overwhelming dumps of buzzwords without logical sequence.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span><strong>No Real-World Context:</strong> Fails to explain architectural tradeoffs and practical implementation.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span><strong>Tutorial Hell:</strong> Triggers endless passive video consumption instead of active building.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span><strong>Low-Quality Paywalled Material:</strong> Clickbait courses and aggressive bootcamp upsells.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-4 border-t border-rose-500/15 font-mono text-xs text-rose-600 dark:text-rose-300">
+            {t('why.typicalResult')}
+          </div>
+        </div>
+
+        <!-- Right: EngineerGuide -->
+        <div class="rounded-2xl border border-sky-500/30 bg-sky-500/5 dark:bg-sky-950/15 p-8 flex flex-col justify-between shadow-xl shadow-sky-500/5">
+          <div>
+            <div class="flex items-center gap-2.5 mb-6">
+              <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/20 text-sky-600 dark:text-sky-400 font-mono text-sm font-bold">
+                ✓
+              </span>
+              <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white">{t('why.egTitle')}</h3>
+            </div>
+
+            <ul class="space-y-4 text-sm text-slate-700 dark:text-slate-200">
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong>Calibrated Milestones:</strong> Clean progression from fundamentals to production-level architecture.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong>Canonical Free Courses:</strong> MIT OpenCourseWare, Stanford, CS50, and official documentation.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong>Learner Experience Windows:</strong> Honest insight into normal cognitive friction and overcoming plateaus.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong>AI Pacing:</strong> Tailored study schedules configured around your hours and target discipline.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-4 border-t border-sky-500/20 font-mono text-xs text-sky-600 dark:text-sky-300">
+            {t('why.egResult')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Learner Experience Section -->
+  <section id="learner-experience" class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-surface)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-2">{t('learner.badge')}</span>
+        <h2 class="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+          {t('learner.title1')}<br />
+          <span class="text-gradient-accent">{t('learner.titleAccent')}</span>
+        </h2>
+        <p class="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          {t('learner.subtitle')}
+        </p>
+      </div>
+
+      <!-- Experience Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div class="hairline-card p-6 flex flex-col justify-between border-t-2 border-t-sky-500 dark:border-t-sky-400">
+          <div>
+            <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-sky-600 dark:text-sky-400 font-bold mb-3">
+              <span>📍</span>
+              <span>Stage Phase</span>
+            </div>
+            <h3 class="font-sans text-lg font-bold text-slate-950 dark:text-white mb-2">Algorithms & Core Memory</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              Transitioning from basic scripts into pointer mechanics, Big-O limits, recursion, and balanced trees.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-black/8 dark:border-white/8 font-mono text-[11px] text-slate-500">
+            CS · Phase 02
+          </div>
+        </div>
+
+        <div class="hairline-card p-6 flex flex-col justify-between border-t-2 border-t-rose-500 dark:border-t-rose-400">
+          <div>
+            <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-rose-600 dark:text-rose-400 font-bold mb-3">
+              <span>🌀</span>
+              <span>What You Feel</span>
+            </div>
+            <h3 class="font-sans text-lg font-bold text-slate-950 dark:text-white mb-2">The Wall of Abstraction</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              "Everyone else seems to solve this in 10 minutes, but I spent 3 hours on a problem with a 5-line answer. Am I not cut out for this?"
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-black/8 dark:border-white/8 font-mono text-[11px] text-slate-500">
+            Normal cognitive friction
+          </div>
+        </div>
+
+        <div class="hairline-card p-6 flex flex-col justify-between border-t-2 border-t-amber-500 dark:border-t-amber-400">
+          <div>
+            <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold mb-3">
+              <span>⚡</span>
+              <span>The Breakthrough</span>
+            </div>
+            <h3 class="font-sans text-lg font-bold text-slate-950 dark:text-white mb-2">Formulating the Pattern</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              You know the language syntax, but mapping an abstract problem to graph edges or two pointers requires deliberate pattern exposure.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-black/8 dark:border-white/8 font-mono text-[11px] text-slate-500">
+            Requires practice, not genius
+          </div>
+        </div>
+
+        <div class="hairline-card p-6 flex flex-col justify-between border-t-2 border-t-emerald-500 dark:border-t-emerald-400">
+          <div>
+            <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold mb-3">
+              <span>🎯</span>
+              <span>Mastery Checkpoint</span>
+            </div>
+            <h3 class="font-sans text-lg font-bold text-slate-950 dark:text-white mb-2">Intuitive Recognition</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              You can outline the optimal data structure and time complexity on whiteboard before writing a single line of code.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-black/8 dark:border-white/8 font-mono text-[11px] text-slate-500">
+            Mastery unlocked: Next Phase
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Engineering Branches (Clean Grid of All 26 Branches) -->
+  <section id="branches" class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-primary)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-10">
+        <div>
+          <span class="font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-1">{t('branches.badge')}</span>
+          <h2 class="font-sans text-3xl sm:text-4xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+            {t('branches.title')}
+          </h2>
+          <p class="mt-2 text-base text-slate-600 dark:text-slate-400">
+            {t('branches.subtitle')}
+          </p>
+        </div>
+
+        <!-- Live Instant Search -->
+        <div class="w-full sm:w-72">
+          <div class="relative">
+            <input
+              id="branch-search-home"
+              type="text"
+              placeholder={t('branches.searchPlaceholder')}
+              class="w-full rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-2 pl-9 text-xs text-slate-950 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-sky-500 dark:focus:border-sky-400/50 transition-colors"
+            />
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="flex flex-wrap gap-2 mb-10" id="home-category-tabs">
+        {categories.map(cat => (
+          <button
+            type="button"
+            data-cat={cat.id}
+            class={`category-tab-btn rounded-xl border px-4 py-2 text-xs font-semibold font-sans transition-all cursor-pointer ${cat.id === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950 border-slate-900 dark:border-white font-bold' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 hover:text-black dark:hover:text-white'}`}
+          >
+            {cat.label}
+            <span class="ml-1.5 font-mono text-[10px] opacity-70">({cat.count})</span>
+          </button>
+        ))}
+      </div>
+
+      <!-- Branch Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="home-branches-grid">
+        {allBranches.map((branch) => {
+          const href = branch.hasFullRoadmap
+            ? translatePath(`/roadmaps/${branch.fullRoadmapSlug}`)
+            : translatePath(`/roadmaps/overview/${branch.slug}`);
+          const searchData = `${branch.name} ${branch.tagline} ${branch.category}`.toLowerCase();
+          return (
+            <a
+              href={href}
+              data-cat={branch.category}
+              data-search={searchData}
+              class="branch-card p-6 flex flex-col justify-between no-underline group"
+            >
+              <div>
+                <!-- Icon -->
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-3xl transition-transform group-hover:scale-110">{branch.emoji}</span>
+                  {branch.hasFullRoadmap && (
+                    <span class="rounded-md bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-[10px] font-mono px-2 py-0.5 font-semibold">
+                      Full Tree
+                    </span>
+                  )}
+                </div>
+
+                <!-- Branch Name -->
+                <h3 class="font-sans text-base font-bold text-slate-950 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors leading-snug">
+                  {branch.name}
+                </h3>
+
+                <!-- One-line description -->
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+                  {branch.tagline}
+                </p>
+              </div>
+
+              <!-- "Explore →" with subtle hover interaction -->
+              <div class="mt-6 pt-3 border-t border-black/8 dark:border-white/8 flex items-center justify-between">
+                <span class="font-mono text-[11px] text-slate-500 capitalize">
+                  {branch.category}
+                </span>
+                <span class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 group-hover:text-sky-500 dark:group-hover:text-sky-300 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <span>{t('branches.explore')}</span>
+                  <span>→</span>
+                </span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. SEO-Friendly Localized FAQ Section -->
+  <section id="faq" class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-surface)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <div class="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 px-3.5 py-1 text-xs font-mono font-medium text-sky-600 dark:text-sky-400 mb-4 shadow-xs">
+          <span>{t('faq.badge')}</span>
+        </div>
+        <h2 class="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+          {t('faq.title')}
+        </h2>
+        <p class="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          {t('faq.subtitle')}
+        </p>
+
+        <!-- Live FAQ Search Filter -->
+        <div class="mt-8 max-w-md mx-auto">
+          <div class="relative">
+            <input
+              id="faq-search-input"
+              type="text"
+              placeholder={t('faq.searchPlaceholder')}
+              class="w-full rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-2.5 pl-10 text-xs text-slate-950 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-sky-500 dark:focus:border-sky-400/50 transition-colors shadow-xs"
+            />
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Accordion List -->
+      <div class="space-y-3.5" id="faq-accordion-list">
+        {faqs.map((faq, index) => (
+          <details 
+            class="faq-item hairline-card group p-5 transition-all overflow-hidden cursor-pointer"
+            data-question={faq.question.toLowerCase()}
+            data-answer={faq.answer.toLowerCase()}
+          >
+            <summary class="flex items-center justify-between gap-4 font-sans text-base font-bold text-slate-900 dark:text-white list-none select-none">
+              <span class="flex items-center gap-3">
+                <span class="font-mono text-xs text-sky-600 dark:text-sky-400 font-semibold bg-sky-500/10 px-2 py-0.5 rounded-md border border-sky-500/20 shrink-0">
+                  {index + 1 < 10 ? `0${index + 1}` : index + 1}
+                </span>
+                <span class="group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                  {faq.question}
+                </span>
+              </span>
+              <svg 
+                class="w-5 h-5 text-slate-400 group-hover:text-sky-500 transition-transform duration-200 shrink-0 group-open:rotate-180" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor" 
+                stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div class="pt-4 mt-3 border-t border-black/5 dark:border-white/8 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+
+      <!-- Empty State for FAQ Search -->
+      <div id="faq-empty-state" class="hidden text-center py-12">
+        <p class="text-sm font-mono text-slate-500 dark:text-slate-400">
+          {t('faq.emptySearch')}
+        </p>
+      </div>
+
+      <!-- Quick Assistance Callout -->
+      <div class="mt-12 p-6 rounded-2xl border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/20 text-sky-600 dark:text-sky-400 font-mono text-lg font-bold shrink-0">
+            💡
+          </div>
+          <div>
+            <h4 class="font-sans text-sm font-bold text-slate-950 dark:text-white">{t('faq.advisorTitle')}</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-400">{t('faq.advisorDesc')}</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="open-personalizer-trigger shrink-0 rounded-xl bg-sky-500 hover:bg-sky-600 px-5 py-2.5 font-sans text-xs font-semibold text-white shadow-xs transition-all cursor-pointer active:scale-95"
+        >
+          {t('faq.askAdvisor')}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Bottom Banner / CTA -->
+  <section class="bg-[var(--bg-primary)] py-16 sm:py-24 text-center transition-colors">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <h2 class="font-sans text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white mb-4">
+        {t('cta.title')}
+      </h2>
+      <p class="text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-xl mx-auto">
+        {t('cta.subtitle')}
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a
+          href={translatePath('/roadmaps')}
+          class="rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-8 py-3.5 font-sans text-sm font-semibold text-white shadow-md shadow-sky-500/20 hover:opacity-95 transition-all active:scale-95 no-underline"
+        >
+          {t('cta.buttonAll')}
+        </a>
+        <button
+          type="button"
+          class="open-personalizer-trigger rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-8 py-3.5 font-sans text-sm font-semibold text-slate-800 dark:text-slate-200 hover:border-black/20 dark:hover:border-white/20 hover:bg-black/10 dark:hover:bg-white/10 hover:text-black dark:hover:text-white transition-all cursor-pointer"
+        >
+          {t('cta.buttonAi')}
+        </button>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  function setupHomeInteractions() {
+    // 1. Branch Filtering
+    const searchInput = document.getElementById('branch-search-home') as HTMLInputElement | null;
+    const catButtons = document.querySelectorAll('.category-tab-btn');
+    const cards = document.querySelectorAll('#home-branches-grid > a');
+
+    let activeCat = 'all';
+    let searchQuery = '';
+
+    function filterBranches() {
+      cards.forEach((card) => {
+        const c = card as HTMLElement;
+        const cat = c.getAttribute('data-cat') || '';
+        const search = c.getAttribute('data-search') || '';
+
+        const matchesCat = activeCat === 'all' || cat === activeCat;
+        const matchesSearch = !searchQuery || search.includes(searchQuery);
+
+        if (matchesCat && matchesSearch) {
+          c.classList.remove('hidden');
+        } else {
+          c.classList.add('hidden');
+        }
+      });
+    }
+
+    searchInput?.addEventListener('input', (e) => {
+      searchQuery = (e.target as HTMLInputElement).value.trim().toLowerCase();
+      filterBranches();
+    });
+
+    catButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        catButtons.forEach(b => {
+          b.className = 'category-tab-btn rounded-xl border px-4 py-2 text-xs font-semibold font-sans transition-all cursor-pointer bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 hover:text-black dark:hover:text-white';
+        });
+        btn.className = 'category-tab-btn rounded-xl border px-4 py-2 text-xs font-semibold font-sans transition-all cursor-pointer bg-slate-900 text-white dark:bg-white dark:text-slate-950 border-slate-900 dark:border-white font-bold';
+
+        activeCat = btn.getAttribute('data-cat') || 'all';
+        filterBranches();
+      });
+    });
+
+    // 2. FAQ Live Search
+    const faqSearchInput = document.getElementById('faq-search-input') as HTMLInputElement | null;
+    const faqItems = document.querySelectorAll('.faq-item');
+    const faqEmptyState = document.getElementById('faq-empty-state');
+
+    faqSearchInput?.addEventListener('input', (e) => {
+      const q = (e.target as HTMLInputElement).value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      faqItems.forEach((item) => {
+        const el = item as HTMLElement;
+        const questionText = el.getAttribute('data-question') || '';
+        const answerText = el.getAttribute('data-answer') || '';
+
+        if (!q || questionText.includes(q) || answerText.includes(q)) {
+          el.classList.remove('hidden');
+          visibleCount++;
+          if (q.length >= 3 && (questionText.includes(q) || answerText.includes(q))) {
+            (el as HTMLDetailsElement).open = true;
+          }
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      if (faqEmptyState) {
+        if (visibleCount === 0) {
+          faqEmptyState.classList.remove('hidden');
+        } else {
+          faqEmptyState.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupHomeInteractions);
+</script>

@@ -1,0 +1,169 @@
+---
+// src/components/seo/SEO.astro
+// Centralized, production-ready SEO engine for EngineerGuide
+export interface BreadcrumbItem {
+  name: string;
+  item: string;
+}
+
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+export interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  noindex?: boolean;
+  type?: 'website' | 'article';
+  ogImage?: string;
+  breadcrumbs?: BreadcrumbItem[];
+  faqs?: FAQItem[];
+  articleData?: {
+    publishedTime?: string;
+    modifiedTime?: string;
+    authors?: string[];
+    section?: string;
+    tags?: string[];
+  };
+}
+
+const {
+  title,
+  description,
+  canonical,
+  noindex = false,
+  type = 'website',
+  ogImage = 'https://engineerguide.com/og-image.png',
+  breadcrumbs = [],
+  faqs = [],
+  articleData,
+} = Astro.props;
+
+const siteUrl = 'https://engineerguide.com';
+const pathname = Astro.url.pathname.replace(/\/$/, '') || '/';
+const canonicalUrl = canonical || `${siteUrl}${pathname === '/' ? '' : pathname}`;
+
+// Google Search Console & Bing Webmaster Verification IDs (optional env vars)
+const gscVerification = import.meta.env.PUBLIC_GSC_VERIFICATION;
+const bingVerification = import.meta.env.PUBLIC_BING_VERIFICATION;
+
+// Base WebSite and Organization Schema
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'EngineerGuide',
+  url: siteUrl,
+  description: 'Interactive engineering roadmaps, canonical free learning resources, and career guides for students and developers.',
+};
+
+const organizationSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'EngineerGuide',
+  url: siteUrl,
+  logo: `${siteUrl}/favicon.svg`,
+  sameAs: [
+    'https://github.com/engineerguide',
+    'https://x.com/engineerguide',
+  ],
+};
+
+// BreadcrumbList Schema (if breadcrumbs provided)
+const breadcrumbSchema = breadcrumbs.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbs.map((crumb, idx) => ({
+    '@type': 'ListItem',
+    position: idx + 1,
+    name: crumb.name,
+    item: crumb.item.startsWith('http') ? crumb.item : `${siteUrl}${crumb.item}`,
+  })),
+} : null;
+
+// FAQPage Schema (ONLY generated when faqs are visibly provided to this component)
+const faqSchema = faqs.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+} : null;
+
+// WebPage or Article Schema
+const pageSchema = type === 'article' && articleData ? {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description: description,
+  url: canonicalUrl,
+  image: ogImage,
+  datePublished: articleData.publishedTime || '2026-01-01T00:00:00Z',
+  dateModified: articleData.modifiedTime || new Date().toISOString(),
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': canonicalUrl,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'EngineerGuide',
+    logo: {
+      '@type': 'ImageObject',
+      url: `${siteUrl}/favicon.svg`,
+    },
+  },
+} : {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: title,
+  description: description,
+  url: canonicalUrl,
+};
+---
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+<!-- Robots Handling -->
+{noindex ? (
+  <meta name="robots" content="noindex, follow" />
+) : (
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+)}
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalUrl} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:site_name" content="EngineerGuide" />
+
+<!-- Twitter / X Cards -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalUrl} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<!-- Search Engine Verification (conditional) -->
+{gscVerification && <meta name="google-site-verification" content={gscVerification} />}
+{bingVerification && <meta name="msvalidate.01" content={bingVerification} />}
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+<script type="application/ld+json" set:html={JSON.stringify(organizationSchema)} />
+<script type="application/ld+json" set:html={JSON.stringify(pageSchema)} />
+{breadcrumbSchema && <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />}
+{faqSchema && <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}

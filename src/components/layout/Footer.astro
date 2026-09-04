@@ -1,0 +1,148 @@
+---
+// src/components/layout/Footer.astro
+import { allBranches } from '../../data/branches';
+import { allRoadmaps } from '../../data/roadmaps';
+import { allResources } from '../../data/resources';
+import { projectCategories } from '../../data/projects';
+import { getLangFromUrl, useTranslatedPath } from '../../i18n/utils';
+
+const currentLang = getLangFromUrl(Astro.url);
+const translatePath = useTranslatedPath(currentLang);
+---
+
+<footer class="border-t border-black/8 dark:border-white/8 bg-[var(--bg-primary)] py-16 text-sm text-slate-600 dark:text-slate-400 transition-colors">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-12">
+    <!-- Top Row: Brand & Summary -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-black/8 dark:border-white/8">
+      <div class="space-y-2">
+        <div class="flex items-center gap-2.5">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-black/5 dark:bg-white/10 text-slate-950 dark:text-white font-mono text-sm font-semibold border border-black/10 dark:border-white/15">
+            EG
+          </div>
+          <span class="font-sans text-lg font-bold tracking-tight text-slate-950 dark:text-white">
+            Engineer<span class="text-sky-600 dark:text-sky-400">guide</span>
+          </span>
+        </div>
+        <p class="max-w-xl text-xs leading-relaxed text-slate-600 dark:text-slate-400 font-normal">
+          An open, structured engineering learning and career guidance platform. Master software engineering, AI/ML, cloud systems, and robotics with canonical free curriculums and portfolio-grade project specifications.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 font-mono text-xs text-slate-500">
+        <span>26 Engineering Disciplines</span>
+        <span>•</span>
+        <span>Zero Paywalls</span>
+        <span>•</span>
+        <span>Open Canonical Knowledge</span>
+      </div>
+    </div>
+
+    <!-- Middle Grid: 4 Semantic Topic Clusters -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- Col 1: Core Roadmaps -->
+      <div class="space-y-3">
+        <h4 class="font-mono text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-1.5">
+          <span>🗺️</span>
+          <span>Core Roadmaps</span>
+        </h4>
+        <ul class="space-y-2 text-xs">
+          <li>
+            <a href="/roadmaps" class="text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 font-semibold transition-colors">
+              All 26 Roadmaps Directory →
+            </a>
+          </li>
+          {allRoadmaps.map((r) => (
+            <li>
+              <a href={`/roadmaps/${r.slug}`} class="text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">
+                {r.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Col 2: Free Learning Resources -->
+      <div class="space-y-3">
+        <h4 class="font-mono text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-1.5">
+          <span>📚</span>
+          <span>Free Resources</span>
+        </h4>
+        <ul class="space-y-2 text-xs">
+          <li>
+            <a href="/resources" class="text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 font-semibold transition-colors">
+              All Resource Guides →
+            </a>
+          </li>
+          {allResources.slice(0, 6).map((res) => (
+            <li>
+              <a href={`/resources/${res.slug}`} class="text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">
+                {res.shortName} Guide & Docs
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Col 3: Portfolio Projects -->
+      <div class="space-y-3">
+        <h4 class="font-mono text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-1.5">
+          <span>🛠️</span>
+          <span>Portfolio Projects</span>
+        </h4>
+        <ul class="space-y-2 text-xs">
+          <li>
+            <a href="/projects" class="text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 font-semibold transition-colors">
+              All Project Specifications →
+            </a>
+          </li>
+          {projectCategories.map((cat) => (
+            <li>
+              <a href={`/projects/${cat.slug}`} class="text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">
+                {cat.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- Col 4: Platform & Guidance -->
+      <div class="space-y-3">
+        <h4 class="font-mono text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white flex items-center gap-1.5">
+          <span>💡</span>
+          <span>Career & Guidance</span>
+        </h4>
+        <ul class="space-y-2 text-xs">
+          <li>
+            <a href="/#faq" class="text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">
+              Engineering FAQs (20 Answers)
+            </a>
+          </li>
+          <li>
+            <a href="/#branches" class="text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">
+              Explore 26 Engineering Branches
+            </a>
+          </li>
+          <li>
+            <button type="button" class="open-personalizer-trigger text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors text-left cursor-pointer">
+              AI Skill Diagnostic & Gap Finder
+            </button>
+          </li>
+          <li>
+            <a href="/sitemap.xml" class="text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors">
+              XML Sitemap (Clean Index)
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Copyright -->
+    <div class="pt-8 border-t border-black/8 dark:border-white/8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 font-mono gap-4">
+      <p>© {new Date().getFullYear()} EngineerGuide. Open educational resource for students and developers.</p>
+      <div class="flex gap-6">
+        <span>No Paywalls</span>
+        <span>Topical Authority</span>
+      </div>
+    </div>
+  </div>
+</footer>

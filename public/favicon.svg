@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0b1120" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Electric Cyan to Indigo Brand Gradient -->
+    <linearGradient id="brandGrad" x1="24" y1="24" x2="104" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#6366f1" />
+    </linearGradient>
+
+    <!-- Soft Ambient Glow -->
+    <filter id="nodeGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Modern Rounded Squircle Base -->
+  <rect x="4" y="4" width="120" height="120" rx="30" fill="url(#bg)" stroke="#1e293b" stroke-width="2.5" />
+  
+  <!-- Subtle Inner Border Glow -->
+  <rect x="6" y="6" width="116" height="116" rx="28" fill="none" stroke="#38bdf8" stroke-width="1.2" stroke-opacity="0.2" />
+
+  <!-- Stylized Geometric "EG" Roadmap Pathway -->
+  <!-- Monogram E (Left Branch Track) -->
+  <path 
+    d="M 32 36 L 58 36 C 60 36 61.5 37.5 61.5 39.5 C 61.5 41.5 60 43 58 43 L 40 43 L 40 59 L 55 59 C 57 59 58.5 60.5 58.5 62.5 C 58.5 64.5 57 66 55 66 L 40 66 L 40 85 L 58 85 C 60 85 61.5 86.5 61.5 88.5 C 61.5 90.5 60 92 58 92 L 32 92 C 30 92 28.5 90.5 28.5 88.5 L 28.5 39.5 C 28.5 37.5 30 36 32 36 Z" 
+    fill="url(#brandGrad)"
+  />
+
+  <!-- Monogram G (Right Roadmap Loop with Directional Arrow / Waypoint) -->
+  <path 
+    d="M 94 48 C 92 46.5 89.5 46.8 88 48.8 C 86.5 50.8 86.8 53.5 89 55 C 93.5 58.5 95 62.5 95 66 C 95 76 87 84 76 84 C 66 84 59 77 59 67 C 59 57 66 49.5 76 49.5 C 79.5 49.5 83 50.8 85.5 53 C 87.2 54.5 90 54.2 91.5 52.5 C 93 50.8 92.8 48 91 46.5 C 86.8 43 81.5 41.5 76 41.5 C 61.5 41.5 50.5 52.5 50.5 67 C 50.5 81.5 62 92 76 92 C 86.5 92 95 85.5 98 76 C 98.8 73.5 99 71 99 67 L 99 62 C 99 60 97.5 58.5 95.5 58.5 L 77 58.5 C 75 58.5 73.5 60 73.5 62 C 73.5 64 75 65.5 77 65.5 L 91.5 65.5 C 91.2 68.5 90.5 71 89 73 C 86 77 81.5 79.5 76 79.5 C 68.5 79.5 63 74 63 67 C 63 59.8 68.5 54 76 54 C 80 54 83.5 55.5 86 58" 
+    fill="url(#brandGrad)"
+  />
+
+  <!-- Glowing Precision Roadmap Waypoints -->
+  <!-- Top active milestone node -->
+  <circle cx="60" cy="39.5" r="5" fill="#38bdf8" filter="url(#nodeGlow)" />
+  <circle cx="60" cy="39.5" r="2.5" fill="#ffffff" />
+
+  <!-- Middle milestone node -->
+  <circle cx="56" cy="62.5" r="4.5" fill="#38bdf8" />
+  <circle cx="56" cy="62.5" r="2" fill="#ffffff" />
+
+  <!-- Goal milestone node (Indigo glow) -->
+  <circle cx="95.5" cy="62" r="5" fill="#6366f1" filter="url(#nodeGlow)" />
+  <circle cx="95.5" cy="62" r="2.5" fill="#38bdf8" />
+</svg>

@@ -1,0 +1,41 @@
+---
+// src/components/seo/Breadcrumbs.astro
+export interface BreadcrumbItem {
+  name: string;
+  item: string;
+}
+
+export interface Props {
+  items: BreadcrumbItem[];
+  class?: string;
+}
+
+const { items, class: className = '' } = Astro.props;
+---
+
+{items && items.length > 0 && (
+  <nav aria-label="Breadcrumb" class={`flex items-center gap-2 font-mono text-xs text-slate-500 dark:text-slate-400 ${className}`}>
+    <ol class="flex items-center gap-2 flex-wrap list-none p-0 m-0">
+      {items.map((crumb, idx) => {
+        const isLast = idx === items.length - 1;
+        return (
+          <li class="flex items-center gap-2">
+            {idx > 0 && <span class="text-slate-400 dark:text-slate-600 select-none">/</span>}
+            {isLast ? (
+              <span class="text-slate-900 dark:text-white font-semibold truncate max-w-[260px] sm:max-w-none" aria-current="page">
+                {crumb.name}
+              </span>
+            ) : (
+              <a
+                href={crumb.item}
+                class="hover:text-slate-950 dark:hover:text-white transition-colors no-underline"
+              >
+                {crumb.name}
+              </a>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  </nav>
+)}

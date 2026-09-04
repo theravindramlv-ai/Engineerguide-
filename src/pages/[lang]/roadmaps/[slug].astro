@@ -1,0 +1,143 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import RoadmapTree from '../../../components/roadmap/RoadmapTree.astro';
+import { allRoadmaps, type Roadmap } from '../../../data/roadmaps';
+import { allBranches } from '../../../data/branches';
+import { useTranslations, useTranslatedPath, type Lang } from '../../../i18n/utils';
+
+export async function getStaticPaths() {
+  const locales = ['es', 'ja', 'fr', 'de', 'pt', 'ko', 'it'];
+  return locales.flatMap((lang) =>
+    allRoadmaps.map((roadmap) => ({
+      params: { lang, slug: roadmap.slug },
+      props: { roadmap },
+    }))
+  );
+}
+
+interface Props {
+  roadmap: Roadmap;
+}
+
+const { lang } = Astro.params;
+const currentLang = (lang || 'en') as Lang;
+const { roadmap } = Astro.props;
+const t = useTranslations(currentLang);
+const translatePath = useTranslatedPath(currentLang);
+---
+
+<Layout 
+  title={`${roadmap.title} — EngineerGuide`}
+  description={roadmap.description}
+>
+  <!-- Roadmap Hero Section -->
+  <header class="relative border-b border-[#ebebeb] bg-white py-14 sm:py-20 overflow-hidden transition-colors dark:border-[#27272a] dark:bg-[#0c0c0e]">
+    <!-- Subtle Hero Gradient Accent -->
+    <div class="absolute inset-0 hero-mesh-gradient opacity-60"></div>
+
+    <div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <!-- Breadcrumb & Branch Eyebrow -->
+      <div class="flex items-center gap-2 mb-4 font-mono text-xs text-neutral-400 dark:text-neutral-500">
+        <a href={translatePath('/')} class="hover:text-[#171717] dark:hover:text-white transition-colors no-underline">
+          {currentLang === 'es' ? 'Inicio' : currentLang === 'ja' ? 'ホーム' : currentLang === 'fr' ? 'Accueil' : currentLang === 'de' ? 'Startseite' : currentLang === 'pt' ? 'Início' : currentLang === 'ko' ? '홈' : currentLang === 'it' ? 'Home' : 'Home'}
+        </a>
+        <span>/</span>
+        <a href={translatePath('/roadmaps')} class="hover:text-[#171717] dark:hover:text-white transition-colors no-underline">
+          {t('nav.roadmaps')}
+        </a>
+        <span>/</span>
+        <span class="text-[#171717] dark:text-white font-semibold">{roadmap.branchName}</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="font-sans text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] text-[#171717] dark:text-white leading-tight mb-4">
+        {roadmap.title}
+      </h1>
+
+      <p class="max-w-3xl text-sm sm:text-base leading-relaxed text-[#4d4d4d] dark:text-[#a1a1aa] mb-6">
+        {roadmap.description}
+      </p>
+
+      <!-- Key Metrics Strip -->
+      <div class="flex flex-wrap items-center gap-4 pt-4 border-t border-neutral-100 dark:border-[#27272a] font-mono text-xs text-neutral-600 dark:text-neutral-400">
+        <div class="flex items-center gap-1.5 rounded-full bg-neutral-100 dark:bg-[#18181b] border border-transparent dark:border-[#27272a] px-3 py-1">
+          <span class="text-neutral-400 dark:text-neutral-500">Total Effort:</span>
+          <span class="font-bold text-[#171717] dark:text-white">~{roadmap.totalHours} Hours</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 rounded-full bg-neutral-100 dark:bg-[#18181b] border border-transparent dark:border-[#27272a] px-3 py-1">
+          <span class="text-neutral-400 dark:text-neutral-500">Pace:</span>
+          <span class="font-bold text-[#171717] dark:text-white">{roadmap.estimatedWeeks} Weeks (~12h/wk)</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 rounded-full bg-neutral-100 dark:bg-[#18181b] border border-transparent dark:border-[#27272a] px-3 py-1">
+          <span class="text-neutral-400 dark:text-neutral-500">Rigor:</span>
+          <span class="font-bold text-indigo-700 dark:text-indigo-400">{roadmap.difficultyLevel}</span>
+        </div>
+
+        <!-- AI Personalizer trigger on roadmap page -->
+        <button 
+          type="button" 
+          class="open-personalizer-trigger ml-auto inline-flex items-center gap-2 rounded-full bg-[#171717] px-4 py-1.5 text-xs font-medium text-white hover:bg-black transition-all cursor-pointer shadow-xs dark:bg-white dark:text-[#09090b] dark:hover:bg-neutral-200"
+        >
+          <svg class="h-3.5 w-3.5 text-cyan-400 dark:text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>{t('cta.buttonAi')}</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Visual Interactive Roadmap Tree -->
+  <main>
+    <RoadmapTree roadmap={roadmap} />
+  </main>
+
+  <!-- Explore All Engineering Branches Section -->
+  <section class="border-t border-[#ebebeb] bg-[#fafafa] py-16 transition-colors dark:border-[#27272a] dark:bg-[#09090b]">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+        <div>
+          <span class="font-mono text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 block mb-1">
+            {t('branches.badge')}
+          </span>
+          <h2 class="font-sans text-2xl sm:text-3xl font-extrabold text-[#171717] dark:text-white tracking-tight">
+            {t('branches.title')}
+          </h2>
+        </div>
+        <a 
+          href={translatePath('/roadmaps')} 
+          class="font-mono text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center gap-1"
+        >
+          <span>{t('featured.viewAll')}</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        {allBranches.filter(b => b.fullRoadmapSlug !== roadmap.slug).map((branch) => {
+          const href = branch.hasFullRoadmap
+            ? translatePath(`/roadmaps/${branch.fullRoadmapSlug}`)
+            : translatePath(`/roadmaps/overview/${branch.slug}`);
+          return (
+            <a
+              href={href}
+              class="flex items-center gap-2.5 rounded-xl border border-[#ebebeb] bg-white p-3 hover:border-neutral-400 hover:shadow-xs transition-all no-underline group dark:border-[#27272a] dark:bg-[#121215] dark:hover:border-neutral-600"
+            >
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">{branch.emoji}</span>
+              <div class="min-w-0 flex-1">
+                <div class="font-sans text-xs font-bold text-[#171717] dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {branch.name}
+                </div>
+                <div class="font-mono text-[10px] text-neutral-400 dark:text-neutral-500 capitalize truncate">
+                  {branch.category}
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+</Layout>

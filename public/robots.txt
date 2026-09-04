@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /search?*
+Disallow: /*?*filter=*
+
+Sitemap: https://engineerguide.com/sitemap.xml

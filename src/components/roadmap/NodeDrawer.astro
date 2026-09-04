@@ -1,0 +1,130 @@
+---
+import type { Roadmap } from '../../data/roadmaps/types';
+
+interface Props {
+  roadmap: Roadmap;
+}
+
+const { roadmap } = Astro.props;
+
+// Collect all nodes into a map for fast lookup
+const allNodes = roadmap.phases.flatMap(p => p.nodes);
+---
+
+<!-- Slide-over Drawer Backdrop -->
+<div 
+  id="node-drawer-backdrop" 
+  class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs transition-opacity duration-200 hidden opacity-0"
+  aria-hidden="true"
+></div>
+
+<!-- Slide-over Drawer Panel -->
+<div 
+  id="node-drawer-panel" 
+  class="fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col bg-white shadow-2xl border-l border-[#ebebeb] transition-transform duration-300 translate-x-full dark:bg-[#121215] dark:border-[#27272a]"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="drawer-title"
+>
+  <!-- Header -->
+  <div class="flex items-center justify-between border-b border-[#ebebeb] px-6 py-4 bg-[#fafafa] dark:border-[#27272a] dark:bg-[#18181b]">
+    <div>
+      <span id="drawer-category" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+        Module Spec
+      </span>
+      <h3 id="drawer-title" class="font-sans text-xl font-bold tracking-tight text-[#171717] dark:text-white">
+        Node Title
+      </h3>
+    </div>
+    <button 
+      id="close-drawer-btn" 
+      type="button" 
+      class="rounded-[6px] border border-[#ebebeb] bg-white p-2 text-neutral-400 hover:text-neutral-700 hover:border-neutral-400 transition-colors cursor-pointer dark:border-[#27272a] dark:bg-[#121215] dark:text-neutral-400 dark:hover:text-white dark:hover:border-neutral-600"
+      aria-label="Close drawer"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Scrollable Content -->
+  <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+    <!-- Meta Strip -->
+    <div class="flex flex-wrap items-center gap-3 font-mono text-xs text-neutral-600 dark:text-neutral-300">
+      <div class="flex items-center gap-1.5 rounded-full bg-neutral-100 dark:bg-[#18181b] dark:border dark:border-[#27272a] px-2.5 py-1">
+        <span>Estimated Effort:</span>
+        <span id="drawer-hours" class="font-semibold text-[#171717] dark:text-white">0h</span>
+      </div>
+      <div id="drawer-difficulty-badge" class="rounded-full px-2.5 py-1 font-semibold border">
+        Intermediate
+      </div>
+      <div id="drawer-status-chip" class="rounded-full bg-neutral-100 dark:bg-[#18181b] dark:border dark:border-[#27272a] px-2.5 py-1 text-neutral-700 dark:text-neutral-300 font-medium">
+        Status: Not Started
+      </div>
+    </div>
+
+    <!-- Deep Explanation -->
+    <div>
+      <h4 class="font-mono text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 mb-2">
+        Why This Concept Matters
+      </h4>
+      <div id="drawer-explanation" class="text-sm leading-relaxed text-[#4d4d4d] dark:text-[#a1a1aa] space-y-2 bg-neutral-50 dark:bg-[#18181b] p-4 rounded-xl border border-neutral-200/70 dark:border-[#27272a]">
+        Explanation here...
+      </div>
+    </div>
+
+    <!-- Elite Free Resources Section -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="font-mono text-xs font-semibold uppercase tracking-wider text-[#171717] dark:text-white">
+          Elite Vetted Free Resources
+        </h4>
+        <span class="font-mono text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/60">
+          100% Free & Authoritative
+        </span>
+      </div>
+
+      <div id="drawer-resources-list" class="space-y-3">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+    <!-- Tags & Prerequisites -->
+    <div>
+      <h4 class="font-mono text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 mb-2">
+        Prerequisites & Concepts
+      </h4>
+      <div id="drawer-tags" class="flex flex-wrap gap-1.5">
+        <!-- Injected tags -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="border-t border-[#ebebeb] bg-[#fafafa] px-6 py-4 flex items-center justify-between dark:border-[#27272a] dark:bg-[#18181b]">
+    <button 
+      id="drawer-mark-complete-btn" 
+      type="button" 
+      class="flex items-center gap-2 rounded-full bg-[#171717] px-5 py-2 text-xs font-medium text-white hover:bg-black transition-all cursor-pointer dark:bg-white dark:text-[#09090b] dark:hover:bg-neutral-200"
+    >
+      <svg class="w-4 h-4 text-emerald-400 dark:text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <span>Mark Node as Mastered</span>
+    </button>
+
+    <button 
+      id="drawer-close-secondary-btn" 
+      type="button" 
+      class="rounded-[6px] border border-[#ebebeb] bg-white px-4 py-2 text-xs font-medium text-neutral-600 hover:bg-neutral-50 transition-colors cursor-pointer dark:border-[#27272a] dark:bg-[#121215] dark:text-neutral-300 dark:hover:bg-[#18181b]"
+    >
+      Done
+    </button>
+  </div>
+</div>
+
+<!-- Raw JSON data embedded safely for client script -->
+<script define:vars={{ rawNodesJson: JSON.stringify(allNodes) }}>
+  window.__ROADMAP_NODES__ = JSON.parse(rawNodesJson);
+</script>

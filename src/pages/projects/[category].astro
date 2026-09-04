@@ -1,0 +1,256 @@
+---
+// src/pages/projects/[category].astro
+// Individual project category showcase and detailed specifications
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/seo/Breadcrumbs.astro';
+import { projectCategories, getProjectCategoryBySlug, type ProjectCategory } from '../../data/projects';
+
+export function getStaticPaths() {
+  return projectCategories.map((category) => ({
+    params: { category: category.slug },
+    props: { category },
+  }));
+}
+
+interface Props {
+  category: ProjectCategory;
+}
+
+const { category } = Astro.props;
+
+const breadcrumbs = [
+  { name: 'Home', item: '/' },
+  { name: 'Projects', item: '/projects' },
+  { name: category.name, item: `/projects/${category.slug}` },
+];
+---
+
+<Layout
+  title={`${category.name} — Portfolio Project Specifications | EngineerGuide`}
+  description={`${category.description} Detailed technical specifications, architecture patterns, and extensions for engineering students.`}
+  breadcrumbs={breadcrumbs}
+  type="article"
+  articleData={{
+    publishedTime: '2026-01-20T00:00:00Z',
+    modifiedTime: new Date().toISOString(),
+    section: 'Projects',
+    tags: [category.name, 'Portfolio Projects', 'Engineering Specifications', 'Resume Ready'],
+  }}
+>
+  <!-- Category Header -->
+  <header class="relative overflow-hidden border-b border-black/8 dark:border-white/8 bg-[var(--bg-primary)] pt-14 pb-16 sm:pt-20 sm:pb-22 bg-grid-subtle transition-colors">
+    <div class="hero-radial-glow absolute inset-0 -top-20 h-[550px] w-full pointer-events-none"></div>
+
+    <div class="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-6">
+        <Breadcrumbs items={breadcrumbs} />
+      </div>
+
+      <div class="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 px-3.5 py-1 text-xs font-mono font-medium text-sky-600 dark:text-sky-400 mb-4 shadow-xs">
+        <span class="tracking-wider uppercase">{category.badge}</span>
+      </div>
+
+      <h1 class="font-sans text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-tight mb-4">
+        {category.name}
+      </h1>
+
+      <p class="text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-normal mb-8">
+        {category.description}
+      </p>
+
+      <div class="p-6 rounded-2xl border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-1">
+            Coupled Learning Track
+          </div>
+          <div class="font-sans text-base font-bold text-slate-900 dark:text-white">
+            {category.relatedRoadmapName}
+          </div>
+        </div>
+        <a
+          href={`/roadmaps/${category.relatedRoadmapSlug}`}
+          class="rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 px-5 py-2.5 font-sans text-xs font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors no-underline text-center shrink-0"
+        >
+          View Roadmap Stages →
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Projects Detailed Specifications List -->
+  <main class="bg-[var(--bg-surface)] py-14 sm:py-20 border-b border-black/8 dark:border-white/8 transition-colors">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-16">
+      
+      <div class="space-y-4">
+        <h2 class="font-sans text-2xl font-bold text-slate-950 dark:text-white tracking-tight">
+          Why Build These Projects?
+        </h2>
+        <p class="text-base text-slate-700 dark:text-slate-300 leading-relaxed">
+          {category.whyBuildThese}
+        </p>
+      </div>
+
+      <!-- Individual Detailed Project Cards -->
+      <div class="space-y-12">
+        {category.projects.map((proj, idx) => (
+          <article id={proj.id} class="hairline-card p-6 sm:p-8 rounded-3xl space-y-8 scroll-mt-24">
+            <!-- Project Header -->
+            <div class="border-b border-black/8 dark:border-white/8 pb-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="font-mono text-xs font-bold text-sky-600 dark:text-sky-400">
+                    PROJECT 0{idx + 1}
+                  </span>
+                  <span class="text-slate-300 dark:text-slate-700">·</span>
+                  <span class="rounded-md border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-2 py-0.5 font-mono text-[10px] text-slate-600 dark:text-slate-400">
+                    {proj.difficulty}
+                  </span>
+                </div>
+                <h3 class="font-sans text-2xl font-extrabold text-slate-950 dark:text-white">
+                  {proj.title}
+                </h3>
+              </div>
+            </div>
+
+            <!-- Summary & Prerequisites -->
+            <div class="space-y-3">
+              <p class="text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                {proj.summary}
+              </p>
+              
+              <div class="flex flex-wrap gap-2 pt-2">
+                <span class="font-mono text-xs text-slate-400 dark:text-slate-500 py-1">Prerequisites:</span>
+                {proj.prerequisites.map((prereq) => (
+                  <span class="rounded-lg bg-black/5 dark:bg-white/5 px-2.5 py-1 font-mono text-xs text-slate-600 dark:text-slate-400 border border-black/5 dark:border-white/5">
+                    {prereq}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <!-- Tech Stack & Skills Learned Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
+              <div class="space-y-3">
+                <h4 class="font-sans text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                  Recommended Tech Stack
+                </h4>
+                <div class="flex flex-wrap gap-1.5">
+                  {proj.techStack.map((tech) => (
+                    <span class="rounded-md bg-white dark:bg-white/10 px-2.5 py-1 font-mono text-xs font-semibold text-slate-800 dark:text-white shadow-2xs">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <h4 class="font-sans text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                  Key Skills You Demonstrate
+                </h4>
+                <ul class="space-y-1.5 text-xs text-slate-700 dark:text-slate-300">
+                  {proj.skillsLearned.map((skill) => (
+                    <li class="flex items-start gap-2">
+                      <span class="text-sky-500 mt-0.5">✓</span>
+                      <span>{skill}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <!-- Features to Implement -->
+            <div class="space-y-3">
+              <h4 class="font-sans text-sm font-bold text-slate-950 dark:text-white">
+                Core Features to Implement
+              </h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {proj.featuresToImplement.map((feat, fIdx) => (
+                  <div class="p-4 rounded-xl border border-black/8 dark:border-white/8 bg-white/60 dark:bg-white/5 flex items-start gap-3">
+                    <span class="font-mono text-xs font-bold text-slate-400 mt-0.5">
+                      {fIdx + 1}.
+                    </span>
+                    <span class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                      {feat}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <!-- Architecture Tips & Extensions -->
+            <div class="space-y-4 pt-2">
+              <div class="p-4 rounded-xl border border-amber-500/20 bg-amber-500/5 dark:bg-amber-500/10 space-y-1">
+                <span class="font-mono text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                  <span>💡</span> Architecture Tip
+                </span>
+                <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                  {proj.architectureTips}
+                </p>
+              </div>
+
+              {proj.possibleExtensions.length > 0 && (
+                <div class="p-4 rounded-xl border border-black/8 dark:border-white/8 bg-black/5 dark:bg-white/5 space-y-2">
+                  <span class="font-mono text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+                    Seniority Extension Ideas (To Stand Out in Interviews)
+                  </span>
+                  <ul class="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                    {proj.possibleExtensions.map((ext) => (
+                      <li class="flex items-start gap-2">
+                        <span class="text-sky-500">→</span>
+                        <span>{ext}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <!-- Recommended Documentation Links -->
+            <div class="pt-4 border-t border-black/8 dark:border-white/8 flex flex-wrap items-center justify-between gap-4 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-slate-400">Reference Docs:</span>
+                {proj.recommendedResources.map((res) => (
+                  <a
+                    href={res.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-mono text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>{res.title}</span>
+                    <span class="text-[10px]">↗</span>
+                  </a>
+                ))}
+              </div>
+              <a
+                href={`/roadmaps/${proj.relatedRoadmapSlug}`}
+                class="font-mono text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                Back to {proj.relatedRoadmapName} →
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Cross-link Footer -->
+  <section class="py-14 bg-[var(--bg-primary)] transition-colors">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center space-y-6">
+      <h2 class="font-sans text-xl font-bold text-slate-950 dark:text-white">
+        Explore Other Project Domains
+      </h2>
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        {projectCategories.filter(c => c.slug !== category.slug).map(otherCat => (
+          <a
+            href={`/projects/${otherCat.slug}`}
+            class="rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 px-4 py-2 font-sans text-xs font-semibold text-slate-800 dark:text-slate-200 transition-colors no-underline"
+          >
+            {otherCat.name} →
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>

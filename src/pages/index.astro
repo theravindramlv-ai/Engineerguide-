@@ -1,0 +1,988 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { allBranches } from '../data/branches';
+import { allRoadmaps } from '../data/roadmaps';
+
+const categories = [
+  { id: 'all', label: 'All Branches', count: allBranches.length },
+  { id: 'technology', label: '💻 Technology', count: allBranches.filter(b => b.category === 'technology').length },
+  { id: 'traditional', label: '⚙️ Traditional', count: allBranches.filter(b => b.category === 'traditional').length },
+  { id: 'emerging', label: '🌱 Emerging', count: allBranches.filter(b => b.category === 'emerging').length },
+];
+
+const faqs = [
+  {
+    question: "What is an engineering roadmap?",
+    answer: "An engineering roadmap is a structured learning path that shows the concepts, technologies, projects and resources you can learn to develop skills in a particular engineering or technology field."
+  },
+  {
+    question: "How do I choose the right engineering field?",
+    answer: "Choose an engineering field by aligning your natural problem-solving interests with the day-to-day reality of the discipline: if you enjoy abstract logic, software architecture, and rapid digital iteration, explore Computer Science or Software Engineering; if you prefer physical systems, kinematics, and thermodynamics, consider Mechanical or Aerospace; if you're drawn to circuits, microcontrollers, and hardware, look into Electrical or Robotics. You can also use our interactive 'Help Me Choose' AI tool to get personalized recommendations based on your background and goals."
+  },
+  {
+    question: "What should an engineering student learn first?",
+    answer: "Every engineering student should first build rock-solid foundations in three areas: 1) Foundational mathematics (calculus, linear algebra, and discrete math), 2) Computational thinking and one primary programming language (such as Python, C++, or Java), and 3) Version control with Git and GitHub. These core capabilities form the foundation for all modern engineering disciplines."
+  },
+  {
+    question: "Which engineering field is best for software development?",
+    answer: "Computer Science (CS), Software Engineering (SE), and Computer Engineering (CE) provide the most direct academic pathways for software development. However, students from Electrical, Mechanical, and Mathematics backgrounds also excel as software engineers by mastering core data structures, algorithms, and system design."
+  },
+  {
+    question: "How do I become a software engineer?",
+    answer: "To become a software engineer, follow four core stages: 1) Master a foundational programming language (Python, TypeScript, or Go/Java), 2) Learn essential Computer Science principles including Data Structures and Algorithms (DSA), 3) Build 2-3 full-scale, production-ready portfolio projects that solve genuine problems, and 4) Practice technical problem-solving and system architecture for technical interviews."
+  },
+  {
+    question: "What should I learn for a software engineering internship?",
+    answer: "For software engineering internships, focus on: 1) Strong proficiency in one programming language, 2) LeetCode easy/medium problem-solving (Arrays, Hash Maps, Two Pointers, Trees, and Graphs), 3) Practical Git and GitHub workflows, 4) Building at least one deployed full-stack or systems application with clear documentation, and 5) Clean technical communication and behavioral interview skills."
+  },
+  {
+    question: "Is there a free engineering roadmap?",
+    answer: "Yes! All 26 engineering roadmaps on EngineerGuide are 100% free and open-access. Every roadmap curates top-tier, canonical free resources from institutions like MIT OpenCourseWare, Stanford Online, freeCodeCamp, CS50, and official documentation with zero paywalls."
+  },
+  {
+    question: "What should I learn after programming basics?",
+    answer: "After mastering basic syntax and control flow, immediately transition to Data Structures & Algorithms (Big-O analysis, linked lists, trees, graphs, sorting), Object-Oriented / Functional programming paradigms, Git version control, relational databases (SQL and database design), and computer networking basics."
+  },
+  {
+    question: "How do I choose between web development and AI/ML?",
+    answer: "Choose Web Development if you want immediate visual feedback, love building user-facing products, and want to ship full-stack applications quickly with a high volume of junior job openings. Choose AI/ML if you have strong mathematical foundations (linear algebra, probability, calculus), enjoy statistical modeling, and want to work on deep learning, NLP, and intelligent data systems."
+  },
+  {
+    question: "What projects should engineering students build?",
+    answer: "Avoid generic tutorial clones (like basic to-do lists or calculators). Instead, build 'proof-of-competence' projects: a distributed caching system, a real-time collaborative editor with WebSockets, a full-stack SaaS with authentication and payment webhooks, or an open-source CLI developer tool with automated tests and CI/CD pipelines."
+  },
+  {
+    question: "How many hours should I study engineering skills every day?",
+    answer: "Consistency beats intensity. Aim for 2 to 3 hours of focused, deliberate practice daily rather than 10-hour marathon sessions on weekends. One hour of active code writing and problem solving is far more effective than 4 hours of passive video watching."
+  },
+  {
+    question: "Can I learn software development without a computer science degree?",
+    answer: "Absolutely. A significant percentage of top software engineers are self-taught or come from non-CS backgrounds. What employers care about most is verified proof of ability: clean GitHub repositories, deployed systems, understanding of computer science fundamentals, and strong problem-solving skills."
+  },
+  {
+    question: "What programming language should an engineering student learn first?",
+    answer: "Python is the best starting language for beginners due to its clean syntax, versatility, and dominance in AI/data science. If your focus is systems, embedded, or robotics, learning C/C++ provides unmatched insight into memory management and computer architecture. For modern web and product engineering, TypeScript is the industry standard."
+  },
+  {
+    question: "How do I become internship ready?",
+    answer: "You are internship ready when you can: 1) Independently build and deploy an application from scratch, 2) Solve standard LeetCode Medium algorithms within 30 minutes, 3) Collaborate using Git branches, pull requests, and code reviews, and 4) Clearly articulate technical tradeoffs made in your personal projects."
+  },
+  {
+    question: "How do I become hackathon ready?",
+    answer: "To be hackathon ready: 1) Prepare a reusable starter template (boilerplate with Next.js/Tailwind/Auth/DB), 2) Get comfortable with rapid prototyping APIs (like OpenAI, Supabase, Twilio, and Stripe), 3) Focus on solving one sharp, narrow problem exceptionally well, and 4) Practice pitching and storytelling for the final demo."
+  },
+  {
+    question: "How can I prepare for open source?",
+    answer: "Start by finding beginner-friendly repositories labeled with 'good first issue'. Read the project's CONTRIBUTING.md and setup guide carefully. Begin by improving documentation, fixing typos, or adding missing unit tests to understand the codebase, then progress to resolving small bug fixes and submitting well-explained pull requests."
+  },
+  {
+    question: "Which free resources are best for engineering students?",
+    answer: "The highest authority free resources include Harvard's CS50, MIT OpenCourseWare (6.006 Intro to Algorithms, 6.004 Computation Structures), Stanford Online, NeetCode.io for algorithms, The Odin Project & Full Stack Open for web development, and official documentation (MDN, Python.org, Linux man pages)."
+  },
+  {
+    question: "How do I track my progress while learning?",
+    answer: "Use EngineerGuide's interactive roadmap nodes to check off completed milestones directly in your browser. Maintain a public 'Today I Learned' (TIL) log or commit daily to GitHub. Tracking output (projects shipped and problems solved) is far more reliable than tracking hours spent."
+  },
+  {
+    question: "Can AI create a personalized learning roadmap?",
+    answer: "Yes. Using LLMs and structured heuristics, AI can analyze your current skill level, weekly available hours, and target career outcome to generate a calibrated weekly schedule that eliminates irrelevant topics and accelerates your learning."
+  },
+  {
+    question: "Can EngineerGuide create a roadmap based on my goals?",
+    answer: "Yes! Use the 'AI Personalize Path' button in our navigation or hero section. Select your target discipline, current experience level, and weekly study commitment, and EngineerGuide will generate a tailored schedule with milestone checkpoints designed specifically for your goals."
+  }
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map(faq => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer
+    }
+  }))
+};
+---
+
+<Layout
+  title="Engineering Roadmaps for Students & Developers | EngineerGuide"
+  description="Explore structured engineering roadmaps, foundational programming guides, free learning resources, and portfolio project ideas to become industry ready."
+  faqs={faqs}
+>
+
+  <!-- 1. Hero Section (Two-Column Desktop / Responsive Stack) -->
+  <section class="relative overflow-hidden border-b border-black/8 dark:border-white/8 bg-[var(--bg-primary)] pt-12 pb-20 sm:pt-20 sm:pb-28 bg-grid-subtle transition-colors">
+    <!-- Ambient Radial Glow -->
+    <div class="hero-radial-glow absolute inset-0 -top-24 h-[700px] w-full"></div>
+
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        <!-- Left Column: Copy & Actions -->
+        <div class="lg:col-span-7 text-left">
+
+          <!-- Headline -->
+          <h1 class="font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-[1.12] mb-6">
+            Your engineering journey,<br class="hidden sm:inline" />
+            <span class="text-gradient-accent">mapped out.</span>
+          </h1>
+
+          <!-- Supporting Text -->
+          <p class="max-w-xl text-lg sm:text-xl text-slate-600 dark:text-slate-400 leading-relaxed font-normal mb-8">
+            Explore engineering branches, discover the skills that matter, and follow a clear path using the best free resources.
+          </p>
+
+          <!-- CTAs -->
+          <div class="flex flex-wrap items-center gap-4 mb-12">
+            <a
+              href="#branches"
+              class="rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-7 py-3.5 font-sans text-sm font-semibold text-white shadow-md shadow-sky-500/20 hover:opacity-95 transition-all active:scale-95 no-underline flex items-center gap-2"
+            >
+              <span>Explore Roadmaps</span>
+              <span class="font-mono text-sm">→</span>
+            </a>
+            <button
+              id="open-personalizer-hero"
+              type="button"
+              class="open-personalizer-trigger rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-6 py-3.5 font-sans text-sm font-semibold text-slate-800 dark:text-slate-200 hover:border-black/20 dark:hover:border-white/20 hover:bg-black/10 dark:hover:bg-white/10 hover:text-black dark:hover:text-white transition-all active:scale-95 cursor-pointer flex items-center gap-2"
+            >
+              <svg class="h-4 w-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Discover My Skill Level</span>
+            </button>
+          </div>
+
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-md">
+            Take a short practical assessment to discover your current engineering skills and find your highest-impact learning gaps.
+          </p>
+
+          <!-- Minimal Stats -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 border-t border-black/8 dark:border-white/8">
+            <div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white">26</div>
+              <div class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Engineering Branches</div>
+            </div>
+            <div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white">100%</div>
+              <div class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Free Resources</div>
+            </div>
+            <div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white">Beginner</div>
+              <div class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Friendly Paths</div>
+            </div>
+            <div>
+              <div class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white">Real</div>
+              <div class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">Learner Experience</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Sophisticated Roadmap Visualization Widget -->
+        <div class="lg:col-span-5 relative">
+          <!-- Ambient Glow around Widget -->
+          <div class="absolute -inset-4 rounded-3xl bg-gradient-to-r from-sky-500/15 via-indigo-500/10 to-transparent blur-2xl pointer-events-none"></div>
+
+          <div class="relative rounded-2xl border border-black/10 dark:border-white/10 bg-white/90 dark:bg-[#0e131f]/90 p-6 backdrop-blur-xl shadow-xl dark:shadow-2xl">
+            <!-- Widget Header -->
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-black/10 dark:border-white/10">
+              <div class="flex items-center gap-2.5">
+                <div class="flex h-3 w-3 items-center justify-center">
+                  <span class="flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+                </div>
+                <span class="font-mono text-xs font-bold uppercase tracking-wider text-slate-950 dark:text-white">Interactive Roadmap Engine</span>
+              </div>
+              <span class="font-mono text-[10px] text-sky-600 dark:text-sky-400 rounded-md bg-sky-500/10 border border-sky-500/20 px-2 py-0.5 font-semibold">
+                Live Progression
+              </span>
+            </div>
+
+            <!-- Visual Stages Stream: Start ↓ Foundation ↓ Core Skills ↓ Specialization ↓ Projects ↓ Industry Ready -->
+            <div class="space-y-3 relative">
+              <!-- Animated Glowing Connector Line -->
+              <div class="absolute left-4 top-4 bottom-4 w-px bg-gradient-to-b from-sky-500 via-indigo-500 to-emerald-500 opacity-60"></div>
+
+              <!-- Node 1: Start -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-3 w-3 items-center justify-center rounded-full bg-sky-500 shadow-xs shadow-sky-500/50"></div>
+                <div class="flex-1 rounded-xl border border-black/8 dark:border-white/10 bg-black/5 dark:bg-white/5 p-3 hover:border-sky-500/40 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-900 dark:text-white">01. Start & Exploration</span>
+                    <span class="font-mono text-[9px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-semibold">Completed</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Explore 26 branches, select foundational domain & setup environment</p>
+                </div>
+              </div>
+
+              <!-- Node 2: Foundation -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-3 w-3 items-center justify-center rounded-full bg-sky-500 shadow-xs shadow-sky-500/50"></div>
+                <div class="flex-1 rounded-xl border border-black/8 dark:border-white/10 bg-black/5 dark:bg-white/5 p-3 hover:border-sky-500/40 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-900 dark:text-white">02. Foundation Principles</span>
+                    <span class="font-mono text-[9px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded font-semibold">Verified</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Discrete math, programming syntax & computational thinking</p>
+                </div>
+              </div>
+
+              <!-- Node 3: Core Skills (Active Focus) -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-4 w-4 items-center justify-center rounded-full bg-sky-500 shadow-md shadow-sky-500 animate-pulse">
+                  <div class="h-1.5 w-1.5 rounded-full bg-white"></div>
+                </div>
+                <div class="flex-1 rounded-xl border border-sky-500/50 bg-sky-500/10 p-3 shadow-md shadow-sky-500/5">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <span>03. Core Engineering Skills</span>
+                      <span class="h-1.5 w-1.5 rounded-full bg-sky-500 dark:bg-sky-400 animate-ping"></span>
+                    </span>
+                    <span class="font-mono text-[9px] text-sky-600 dark:text-sky-400 bg-sky-500/20 px-1.5 py-0.2 rounded font-bold">In Progress</span>
+                  </div>
+                  <p class="text-[11px] text-slate-700 dark:text-slate-300 mt-0.5">Data structures, memory management, operating systems & protocols</p>
+                </div>
+              </div>
+
+              <!-- Node 4: Specialization -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-slate-400 dark:bg-slate-600"></div>
+                <div class="flex-1 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 p-3 opacity-80 hover:opacity-100 transition-opacity">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-700 dark:text-slate-200">04. Deep Specialization</span>
+                    <span class="font-mono text-[9px] text-slate-500 dark:text-slate-400">Next Stage</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">AI/ML models, distributed cloud clusters, or low-level firmware</p>
+                </div>
+              </div>
+
+              <!-- Node 5: Projects & Capstone -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-slate-400 dark:bg-slate-600"></div>
+                <div class="flex-1 rounded-xl border border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 p-3 opacity-80 hover:opacity-100 transition-opacity">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-slate-700 dark:text-slate-200">05. Milestone Capstone</span>
+                    <span class="font-mono text-[9px] text-slate-500 dark:text-slate-400">Portfolio</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Architect and ship a production-grade system with open-source proof</p>
+                </div>
+              </div>
+
+              <!-- Node 6: Industry Ready -->
+              <div class="relative flex items-center gap-3 pl-8">
+                <div class="absolute left-2.5 -translate-x-1/2 flex h-2.5 w-2.5 items-center justify-center rounded-full bg-emerald-500"></div>
+                <div class="flex-1 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                  <div class="flex items-center justify-between">
+                    <span class="font-sans text-xs font-bold text-emerald-700 dark:text-emerald-300">06. Industry Ready</span>
+                    <span class="font-mono text-[9px] text-emerald-600 dark:text-emerald-400 font-semibold">Goal</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">High-impact engineering roles with verified architectural readiness</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Widget Footer Hint -->
+            <div class="mt-4 pt-3 border-t border-black/10 dark:border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400">
+              <span>Interactive node inspection</span>
+              <span class="text-sky-600 dark:text-sky-400">Click any roadmap below →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Featured Full Roadmaps Section -->
+  <section class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-surface)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-12">
+        <div>
+          <span class="font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-1">FEATURED PATHS</span>
+          <h2 class="font-sans text-3xl sm:text-4xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+            Flagship Engineering Roadmaps
+          </h2>
+          <p class="mt-2 text-base text-slate-600 dark:text-slate-400 max-w-2xl">
+            Interactive, node-by-node learning trees with authority-tier free resources and local progress saving.
+          </p>
+        </div>
+        <a 
+          href="/roadmaps" 
+          class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 flex items-center gap-1 no-underline"
+        >
+          <span>View All 26 Roadmaps</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {allRoadmaps.map((r) => {
+          const milestonesCount = r.phases.reduce((acc, p) => acc + p.nodes.length, 0);
+          return (
+            <div class="hairline-card p-6 flex flex-col justify-between group">
+              <div>
+                <div class="flex items-start justify-between gap-2 mb-4">
+                  <span class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2.5 py-0.5 rounded-md">
+                    {r.difficultyLevel}
+                  </span>
+                  <span class="font-mono text-xs text-slate-500 dark:text-slate-400">~{r.totalHours}h</span>
+                </div>
+
+                <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                  {r.title}
+                </h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">
+                  {r.description}
+                </p>
+              </div>
+
+              <div>
+                <div class="pt-4 border-t border-black/8 dark:border-white/8 flex items-center justify-between text-xs font-mono text-slate-500 dark:text-slate-400 mb-4">
+                  <span>{r.estimatedWeeks} Weeks</span>
+                  <span>{milestonesCount} Milestones</span>
+                </div>
+                <a
+                  href={`/roadmaps/${r.slug}`}
+                  class="w-full flex items-center justify-center gap-1.5 rounded-lg bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 py-2.5 text-xs font-semibold text-slate-900 dark:text-white group-hover:bg-sky-500/10 group-hover:border-sky-500/30 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-all no-underline"
+                >
+                  <span>Explore roadmap</span>
+                  <span class="group-hover:translate-x-1 transition-transform font-mono">→</span>
+                </a>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Why We're Better (Comparison Section with Check & Cross Icons) -->
+  <section id="why-better" class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-primary)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-14">
+        <span class="font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-2">WHY WE'RE BETTER</span>
+        <h2 class="font-sans text-3xl sm:text-4xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+          Engineered for clarity, not confusion.
+        </h2>
+        <p class="mt-3 text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+          How Engineerguide replaces disconnected YouTube playlists and outdated syllabi with a calibrated curriculum.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <!-- Left: Typical Roadmap (Crosses) -->
+        <div class="rounded-2xl border border-rose-500/20 bg-rose-500/5 dark:bg-rose-950/10 p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2.5 mb-6">
+              <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500/20 text-rose-500 dark:text-rose-400 font-mono text-sm font-bold">
+                ✕
+              </span>
+              <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white">Typical Roadmap</h3>
+            </div>
+
+            <ul class="space-y-4 text-sm text-slate-700 dark:text-slate-300">
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span><strong>Just a list of technologies:</strong> Overwhelming dumps of buzzwords without chronological sequence.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span><strong>No context:</strong> Fails to explain <em>why</em> an architectural pattern matters or how it connects.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span><strong>Too much information:</strong> Triggers tutorial paralysis instead of focused daily execution.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span><strong>Random resources:</strong> Low-quality blog rehashes and paywalled bootcamp funnels.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 dark:text-rose-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span><strong>No progress checkpoints:</strong> Zero metrics to know when you've mastered a concept.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-4 border-t border-rose-500/15 font-mono text-xs text-rose-600 dark:text-rose-300">
+            Result: 85% abandon within 3 weeks due to cognitive overload.
+          </div>
+        </div>
+
+        <!-- Right: EngineerGuide (Checks) -->
+        <div class="rounded-2xl border border-sky-500/30 bg-sky-500/5 dark:bg-sky-950/15 p-8 flex flex-col justify-between shadow-xl shadow-sky-500/5">
+          <div>
+            <div class="flex items-center gap-2.5 mb-6">
+              <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/20 text-sky-600 dark:text-sky-400 font-mono text-sm font-bold">
+                ✓
+              </span>
+              <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white">EngineerGuide Standard</h3>
+            </div>
+
+            <ul class="space-y-4 text-sm text-slate-700 dark:text-slate-200">
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong>Clear milestones:</strong> Calibrated stage-by-stage progression from absolute beginner to senior production.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong>Curated free resources:</strong> Canonical material vetted from MIT, Stanford, official documentation, and open source.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong>Real learner perspective:</strong> Psychological struggle windows that normalize the difficulty of each phase.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong>Projects at the right stage:</strong> Milestone capstone projects that prove real competency on GitHub.</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <svg class="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span><strong>AI-personalized paths:</strong> Custom pacing tailored to your background, hours/week, and career goals.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="mt-8 pt-4 border-t border-sky-500/20 font-mono text-xs text-sky-600 dark:text-sky-300">
+            Result: Predictable momentum and tangible engineering confidence.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Learner Experience Section (Platform Differentiator) -->
+  <section id="learner-experience" class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-surface)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-2">LEARNER EXPERIENCE WINDOW</span>
+        <h2 class="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+          Don't just follow a roadmap.<br />
+          <span class="text-gradient-accent">Know what the journey feels like.</span>
+        </h2>
+        <p class="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Every engineering roadmap tells you <em>what</em> to study. We tell you <em>how it feels</em> at each phase — so when it gets brutal, you know you're right on track.
+        </p>
+      </div>
+
+      <!-- Distinctive Experience Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <!-- Card 1: At this stage... -->
+        <div class="hairline-card p-6 flex flex-col justify-between border-t-2 border-t-sky-500 dark:border-t-sky-400">
+          <div>
+            <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-sky-600 dark:text-sky-400 font-bold mb-3">
+              <span>📍</span>
+              <span>At this stage...</span>
+            </div>
+            <h3 class="font-sans text-lg font-bold text-slate-950 dark:text-white mb-2">Algorithms & Core Memory</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              Transitioning from basic scripts into pointer mechanics, Big-O limits, recursion, and balanced trees.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-black/8 dark:border-white/8 font-mono text-[11px] text-slate-500">
+            CS · Phase 02
+          </div>
+        </div>
+
+        <!-- Card 2: You'll probably feel... -->
+        <div class="hairline-card p-6 flex flex-col justify-between border-t-2 border-t-rose-500 dark:border-t-rose-400">
+          <div>
+            <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-rose-600 dark:text-rose-400 font-bold mb-3">
+              <span>🌀</span>
+              <span>You'll probably feel...</span>
+            </div>
+            <h3 class="font-sans text-lg font-bold text-slate-950 dark:text-white mb-2">The Wall of Abstraction</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              "Everyone else seems to solve this in 10 minutes, but I spent 3 hours on a problem with a 5-line answer. Am I not cut out for this?"
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-black/8 dark:border-white/8 font-mono text-[11px] text-slate-500">
+            Completely normal cognitive friction
+          </div>
+        </div>
+
+        <!-- Card 3: The difficult part... -->
+        <div class="hairline-card p-6 flex flex-col justify-between border-t-2 border-t-amber-500 dark:border-t-amber-400">
+          <div>
+            <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-amber-600 dark:text-amber-400 font-bold mb-3">
+              <span>⚡</span>
+              <span>The difficult part...</span>
+            </div>
+            <h3 class="font-sans text-lg font-bold text-slate-950 dark:text-white mb-2">Formulating the Pattern</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              You know the language syntax, but mapping an abstract problem to graph edges or two pointers paralyzes you.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-black/8 dark:border-white/8 font-mono text-[11px] text-slate-500">
+            Requires pattern exposure, not genius
+          </div>
+        </div>
+
+        <!-- Card 4: You're ready to move on when... -->
+        <div class="hairline-card p-6 flex flex-col justify-between border-t-2 border-t-emerald-500 dark:border-t-emerald-400">
+          <div>
+            <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-emerald-600 dark:text-emerald-400 font-bold mb-3">
+              <span>🎯</span>
+              <span>You're ready when...</span>
+            </div>
+            <h3 class="font-sans text-lg font-bold text-slate-950 dark:text-white mb-2">Intuitive Recognition</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              You can outline the optimal data structure and time complexity on whiteboard before writing a single line of code.
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-black/8 dark:border-white/8 font-mono text-[11px] text-slate-500">
+            Mastery unlocked: Advance to Phase 3
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Engineering Branches (Clean Grid of All 26 Branches) -->
+  <section id="branches" class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-primary)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-10">
+        <div>
+          <span class="font-mono text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-1">ALL 26 DISCIPLINES</span>
+          <h2 class="font-sans text-3xl sm:text-4xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+            Choose your engineering branch.
+          </h2>
+          <p class="mt-2 text-base text-slate-600 dark:text-slate-400">
+            Click any branch to view the complete stage-by-stage roadmap, career trajectories, and free canonical resources.
+          </p>
+        </div>
+
+        <!-- Live Instant Search -->
+        <div class="w-full sm:w-72">
+          <div class="relative">
+            <input
+              id="branch-search-home"
+              type="text"
+              placeholder="Filter branches..."
+              class="w-full rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-2 pl-9 text-xs text-slate-950 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-sky-500 dark:focus:border-sky-400/50 transition-colors"
+            />
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Filter Tabs -->
+      <div class="flex flex-wrap gap-2 mb-10" id="home-category-tabs">
+        {categories.map(cat => (
+          <button
+            type="button"
+            data-cat={cat.id}
+            class={`category-tab-btn rounded-xl border px-4 py-2 text-xs font-semibold font-sans transition-all cursor-pointer ${cat.id === 'all' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950 border-slate-900 dark:border-white font-bold' : 'bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 hover:text-black dark:hover:text-white'}`}
+          >
+            {cat.label}
+            <span class="ml-1.5 font-mono text-[10px] opacity-70">({cat.count})</span>
+          </button>
+        ))}
+      </div>
+
+      <!-- Branch Cards Grid (Each card: icon, branch name, one-line description, Explore ->) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5" id="home-branches-grid">
+        {allBranches.map((branch) => {
+          const href = branch.hasFullRoadmap
+            ? `/roadmaps/${branch.fullRoadmapSlug}`
+            : `/roadmaps/overview/${branch.slug}`;
+          const searchData = `${branch.name} ${branch.tagline} ${branch.category}`.toLowerCase();
+          return (
+            <a
+              href={href}
+              data-cat={branch.category}
+              data-search={searchData}
+              class="branch-card p-6 flex flex-col justify-between no-underline group"
+            >
+              <div>
+                <!-- Icon -->
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-3xl transition-transform group-hover:scale-110">{branch.emoji}</span>
+                  {branch.hasFullRoadmap && (
+                    <span class="rounded-md bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-[10px] font-mono px-2 py-0.5 font-semibold">
+                      Full Tree
+                    </span>
+                  )}
+                </div>
+
+                <!-- Branch Name -->
+                <h3 class="font-sans text-base font-bold text-slate-950 dark:text-white mb-2 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors leading-snug">
+                  {branch.name}
+                </h3>
+
+                <!-- One-line description -->
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+                  {branch.tagline}
+                </p>
+              </div>
+
+              <!-- "Explore →" with subtle hover interaction -->
+              <div class="mt-6 pt-3 border-t border-black/8 dark:border-white/8 flex items-center justify-between">
+                <span class="font-mono text-[11px] text-slate-500 capitalize">
+                  {branch.category}
+                </span>
+                <span class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 group-hover:text-sky-500 dark:group-hover:text-sky-300 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                  <span>Explore</span>
+                  <span>→</span>
+                </span>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Educational Guide & Career Architecture (Topical Authority & Search Intent) -->
+  <section class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-primary)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 space-y-16">
+      <div class="max-w-3xl">
+        <div class="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 px-3.5 py-1 text-xs font-mono font-medium text-sky-600 dark:text-sky-400 mb-4 shadow-xs">
+          <span>CAREER GUIDANCE & METHODOLOGY</span>
+        </div>
+        <h2 class="font-sans text-3xl sm:text-4xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+          How to Navigate Your Engineering Journey from Beginner to Industry Ready
+        </h2>
+        <p class="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
+          Navigating modern technology fields can be overwhelming. Thousands of disconnected tutorials, outdated college syllabi, and conflicting advice create cognitive fatigue. EngineerGuide replaces the noise with structured, stage-by-stage roadmaps, canonical free documentation, and verifiable portfolio milestones.
+        </p>
+      </div>
+
+      <!-- Conceptual Grid: 4 Core Pillars -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Pillar 1 -->
+        <article class="hairline-card p-6 sm:p-8 rounded-3xl space-y-4">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 font-mono text-sm font-bold">
+            01
+          </div>
+          <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white">
+            What is an Engineering Roadmap?
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            An <strong>engineering roadmap</strong> is a sequenced, milestone-oriented learning curriculum that outlines exactly what concepts, tools, architectures, and projects you need to master to build real-world competency. Rather than jumping between isolated video playlists, a roadmap provides a clear topological progression: from fundamental computational logic to system design, database indexing, and distributed deployments.
+          </p>
+          <div class="pt-2">
+            <a href="/roadmaps" class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1">
+              <span>Browse All 26 Engineering Roadmaps</span>
+              <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- Pillar 2 -->
+        <article class="hairline-card p-6 sm:p-8 rounded-3xl space-y-4">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 font-mono text-sm font-bold">
+            02
+          </div>
+          <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white">
+            Who is EngineerGuide For?
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Our platform is built specifically for <strong>undergraduate engineering students</strong>, <strong>self-taught developers</strong>, and <strong>career changers</strong> who want clear, uncompromised technical depth. Whether you are preparing for your first software engineering internship, entering a hackathon, or aiming for production roles in cloud or machine learning, our roadmaps provide the roadmap and canonical resources you need.
+          </p>
+          <div class="pt-2">
+            <a href="/resources" class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1">
+              <span>Explore Free Canonical Resources</span>
+              <span>→</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- Pillar 3 -->
+        <article class="hairline-card p-6 sm:p-8 rounded-3xl space-y-4">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 font-mono text-sm font-bold">
+            03
+          </div>
+          <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white">
+            How to Choose the Right Engineering Discipline
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Choosing a discipline comes down to aligning your problem-solving style with day-to-day work. If you thrive on rapid visual feedback and user workflows, explore <a href="/roadmaps/fullstack-systems" class="text-sky-600 dark:text-sky-400 hover:underline">Full-Stack Web Systems</a>. If you have strong quantitative intuition in linear algebra and statistics, follow the <a href="/roadmaps/ai-ml-engineering" class="text-sky-600 dark:text-sky-400 hover:underline">AI & Machine Learning Roadmap</a>. If you enjoy operating systems, Linux internals, and high availability, explore <a href="/roadmaps/devops-cloud" class="text-sky-600 dark:text-sky-400 hover:underline">DevOps & Cloud Systems</a>.
+          </p>
+          <div class="pt-2">
+            <button type="button" class="open-personalizer-trigger font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1 cursor-pointer">
+              <span>Take the Practical Skill Diagnostic</span>
+              <span>⚡</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- Pillar 4 -->
+        <article class="hairline-card p-6 sm:p-8 rounded-3xl space-y-4">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 font-mono text-sm font-bold">
+            04
+          </div>
+          <h3 class="font-sans text-xl font-bold text-slate-950 dark:text-white">
+            Why Verifiable Projects Outweigh Tutorial Certificates
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Tutorial completion certificates carry little weight in modern technical hiring. Employers look for <strong>proof of competence</strong>: deployed web applications with live links, public GitHub repositories with thoughtful commit histories, automated test suites, and clean database normalization. Building original capstone projects bridges the gap between theoretical knowledge and engineering execution.
+          </p>
+          <div class="pt-2">
+            <a href="/projects" class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1">
+              <span>Explore Portfolio Project Specifications</span>
+              <span>→</span>
+            </a>
+          </div>
+        </article>
+
+      </div>
+
+      <!-- Callout: Topic Clusters & Internal Paths -->
+      <div class="p-8 rounded-3xl border border-black/8 dark:border-white/8 bg-black/5 dark:bg-white/5 space-y-4">
+        <h3 class="font-sans text-lg font-bold text-slate-950 dark:text-white">
+          Our Topic-Cluster Learning Architecture
+        </h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+          Each domain on EngineerGuide connects directly from foundational concepts to hands-on implementation:
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+          <div class="p-4 rounded-xl bg-white dark:bg-black/30 border border-black/5 dark:border-white/5 space-y-2">
+            <span class="font-mono text-xs font-bold text-sky-600 dark:text-sky-400 block">SOFTWARE & WEB</span>
+            <p class="text-xs text-slate-600 dark:text-slate-400">
+              <a href="/roadmaps/fullstack-systems" class="hover:underline font-semibold text-slate-900 dark:text-white">Full-Stack Roadmap</a> → <a href="/resources/javascript" class="hover:underline">JavaScript</a> & <a href="/resources/react" class="hover:underline">React</a> → <a href="/projects/web-development" class="hover:underline">Web Projects</a>
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-white dark:bg-black/30 border border-black/5 dark:border-white/5 space-y-2">
+            <span class="font-mono text-xs font-bold text-sky-600 dark:text-sky-400 block">AI & DATA SCIENCE</span>
+            <p class="text-xs text-slate-600 dark:text-slate-400">
+              <a href="/roadmaps/ai-ml-engineering" class="hover:underline font-semibold text-slate-900 dark:text-white">AI/ML Roadmap</a> → <a href="/resources/python" class="hover:underline">Python</a> & <a href="/resources/machine-learning" class="hover:underline">ML Foundations</a> → <a href="/projects/ai-ml" class="hover:underline">AI Projects</a>
+            </p>
+          </div>
+          <div class="p-4 rounded-xl bg-white dark:bg-black/30 border border-black/5 dark:border-white/5 space-y-2">
+            <span class="font-mono text-xs font-bold text-sky-600 dark:text-sky-400 block">CLOUD & RELIABILITY</span>
+            <p class="text-xs text-slate-600 dark:text-slate-400">
+              <a href="/roadmaps/devops-cloud" class="hover:underline font-semibold text-slate-900 dark:text-white">DevOps Roadmap</a> → <a href="/resources/docker-kubernetes" class="hover:underline">Docker & K8s</a> → <a href="/projects/devops-cloud" class="hover:underline">CI/CD Pipelines</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. SEO-Friendly FAQ Section (All 20 Questions with Schema.org FAQPage JSON-LD) -->
+  <section id="faq" class="border-b border-black/8 dark:border-white/8 bg-[var(--bg-surface)] py-16 sm:py-24 transition-colors">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <div class="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 px-3.5 py-1 text-xs font-mono font-medium text-sky-600 dark:text-sky-400 mb-4 shadow-xs">
+          <span>FREQUENTLY ASKED QUESTIONS</span>
+        </div>
+        <h2 class="font-sans text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+          Everything you need to know about engineering roadmaps.
+        </h2>
+        <p class="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+          Clear answers about choosing a branch, mastering foundational skills, preparing for internships, and leveraging free canonical curricula.
+        </p>
+
+        <!-- Live FAQ Search Filter -->
+        <div class="mt-8 max-w-md mx-auto">
+          <div class="relative">
+            <input
+              id="faq-search-input"
+              type="text"
+              placeholder="Search 20 common engineering questions..."
+              class="w-full rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-4 py-2.5 pl-10 text-xs text-slate-950 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none focus:border-sky-500 dark:focus:border-sky-400/50 transition-colors shadow-xs"
+            />
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ Accordion List -->
+      <div class="space-y-3.5" id="faq-accordion-list">
+        {faqs.map((faq, index) => (
+          <details 
+            class="faq-item hairline-card group p-5 transition-all overflow-hidden cursor-pointer"
+            data-question={faq.question.toLowerCase()}
+            data-answer={faq.answer.toLowerCase()}
+          >
+            <summary class="flex items-center justify-between gap-4 font-sans text-base font-bold text-slate-900 dark:text-white list-none select-none">
+              <span class="flex items-center gap-3">
+                <span class="font-mono text-xs text-sky-600 dark:text-sky-400 font-semibold bg-sky-500/10 px-2 py-0.5 rounded-md border border-sky-500/20 shrink-0">
+                  {index + 1 < 10 ? `0${index + 1}` : index + 1}
+                </span>
+                <span class="group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                  {faq.question}
+                </span>
+              </span>
+              <svg 
+                class="w-5 h-5 text-slate-400 group-hover:text-sky-500 transition-transform duration-200 shrink-0 group-open:rotate-180" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor" 
+                stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div class="pt-4 mt-3 border-t border-black/5 dark:border-white/8 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+
+      <!-- Empty State for FAQ Search -->
+      <div id="faq-empty-state" class="hidden text-center py-12">
+        <p class="text-sm font-mono text-slate-500 dark:text-slate-400">
+          No questions found matching your search. Try searching for "software", "internship", "projects", or "degree".
+        </p>
+      </div>
+
+      <!-- Quick Assistance Callout -->
+      <div class="mt-12 p-6 rounded-2xl border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/20 text-sky-600 dark:text-sky-400 font-mono text-lg font-bold shrink-0">
+            🎯
+          </div>
+          <div>
+            <h4 class="font-sans text-sm font-bold text-slate-950 dark:text-white">Discover My Skill Level</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-400">Take a short practical assessment to discover your current engineering skills and find your highest-impact learning gaps.</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="open-personalizer-trigger shrink-0 rounded-xl bg-sky-500 hover:bg-sky-600 px-5 py-2.5 font-sans text-xs font-semibold text-white shadow-xs transition-all cursor-pointer active:scale-95"
+        >
+          Start Diagnostic →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Bottom Banner / CTA -->
+  <section class="bg-[var(--bg-primary)] py-16 sm:py-24 text-center transition-colors">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <h2 class="font-sans text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white mb-4">
+        Ready to start your engineering path?
+      </h2>
+      <p class="text-base sm:text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-xl mx-auto">
+        Join students and engineers learning with canonical MIT and Stanford curricula — zero paywalls, zero ads.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4">
+        <a
+          href="/roadmaps"
+          class="rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 px-8 py-3.5 font-sans text-sm font-semibold text-white shadow-md shadow-sky-500/20 hover:opacity-95 transition-all active:scale-95 no-underline"
+        >
+          Explore All 26 Roadmaps →
+        </a>
+        <button
+          type="button"
+          class="open-personalizer-trigger rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-8 py-3.5 font-sans text-sm font-semibold text-slate-800 dark:text-slate-200 hover:border-black/20 dark:hover:border-white/20 hover:bg-black/10 dark:hover:bg-white/10 hover:text-black dark:hover:text-white transition-all cursor-pointer"
+        >
+          Discover My Skill Level
+        </button>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  function setupHomeInteractions() {
+    // 1. Branch Filtering
+    const searchInput = document.getElementById('branch-search-home') as HTMLInputElement | null;
+    const catButtons = document.querySelectorAll('.category-tab-btn');
+    const cards = document.querySelectorAll('#home-branches-grid > a');
+
+    let activeCat = 'all';
+    let searchQuery = '';
+
+    function filterBranches() {
+      cards.forEach((card) => {
+        const c = card as HTMLElement;
+        const cat = c.getAttribute('data-cat') || '';
+        const search = c.getAttribute('data-search') || '';
+
+        const matchesCat = activeCat === 'all' || cat === activeCat;
+        const matchesSearch = !searchQuery || search.includes(searchQuery);
+
+        if (matchesCat && matchesSearch) {
+          c.classList.remove('hidden');
+        } else {
+          c.classList.add('hidden');
+        }
+      });
+    }
+
+    searchInput?.addEventListener('input', (e) => {
+      searchQuery = (e.target as HTMLInputElement).value.trim().toLowerCase();
+      filterBranches();
+    });
+
+    catButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        catButtons.forEach(b => {
+          b.className = 'category-tab-btn rounded-xl border px-4 py-2 text-xs font-semibold font-sans transition-all cursor-pointer bg-black/5 dark:bg-white/5 text-slate-700 dark:text-slate-300 border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 hover:text-black dark:hover:text-white';
+        });
+        btn.className = 'category-tab-btn rounded-xl border px-4 py-2 text-xs font-semibold font-sans transition-all cursor-pointer bg-slate-900 text-white dark:bg-white dark:text-slate-950 border-slate-900 dark:border-white font-bold';
+
+        activeCat = btn.getAttribute('data-cat') || 'all';
+        filterBranches();
+      });
+    });
+
+    // 2. FAQ Live Search
+    const faqSearchInput = document.getElementById('faq-search-input') as HTMLInputElement | null;
+    const faqItems = document.querySelectorAll('.faq-item');
+    const faqEmptyState = document.getElementById('faq-empty-state');
+
+    faqSearchInput?.addEventListener('input', (e) => {
+      const q = (e.target as HTMLInputElement).value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      faqItems.forEach((item) => {
+        const el = item as HTMLElement;
+        const questionText = el.getAttribute('data-question') || '';
+        const answerText = el.getAttribute('data-answer') || '';
+
+        if (!q || questionText.includes(q) || answerText.includes(q)) {
+          el.classList.remove('hidden');
+          visibleCount++;
+          // If searching with 3+ characters, automatically expand matching items for immediate reading
+          if (q.length >= 3 && (questionText.includes(q) || answerText.includes(q))) {
+            (el as HTMLDetailsElement).open = true;
+          }
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      if (faqEmptyState) {
+        if (visibleCount === 0) {
+          faqEmptyState.classList.remove('hidden');
+        } else {
+          faqEmptyState.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupHomeInteractions);
+</script>

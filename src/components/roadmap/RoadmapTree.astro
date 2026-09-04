@@ -1,0 +1,445 @@
+---
+import type { Roadmap } from '../../data/roadmaps/types';
+import LearnerExperienceCard from './LearnerExperienceCard.astro';
+import RoadmapNode from './RoadmapNode.astro';
+import NodeDrawer from './NodeDrawer.astro';
+
+interface Props {
+  roadmap: Roadmap;
+}
+
+const { roadmap } = Astro.props;
+const totalNodes = roadmap.phases.reduce((acc, p) => acc + p.nodes.length, 0);
+---
+
+<div class="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
+  <!-- Personalized AI Skill Diagnostic Banner (Active when diagnostic exists) -->
+  <div id="diagnostic-banner" class="hidden mb-6 rounded-2xl border border-sky-500/30 bg-sky-50/50 p-4 sm:p-5 shadow-xs backdrop-blur-md dark:border-sky-500/30 dark:bg-sky-950/20">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="flex h-3 w-3 rounded-full bg-sky-500 animate-pulse"></span>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-sans text-xs sm:text-sm font-bold text-neutral-900 dark:text-white">
+              Personalized for: <span id="diag-career-name" class="text-sky-600 dark:text-sky-400">Full-Stack Developer</span>
+            </span>
+            <span id="diag-readiness-badge" class="rounded-full bg-sky-100 text-sky-800 border border-sky-200 px-2.5 py-0.5 font-mono text-[10px] font-bold dark:bg-sky-900/60 dark:text-sky-300 dark:border-sky-700">
+              Readiness: 45%
+            </span>
+          </div>
+          <p class="text-[11px] text-neutral-600 dark:text-neutral-400 mt-0.5">
+            Nodes tagged with your diagnostic status: <span class="text-emerald-600 dark:text-emerald-400 font-semibold">🟢 Strong</span>, <span class="text-amber-600 dark:text-amber-400 font-semibold">🟡 Developing</span>, <span class="text-rose-600 dark:text-rose-400 font-semibold">🔴 Priority Gap</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button 
+          type="button" 
+          class="open-personalizer-trigger rounded-xl border border-sky-500/40 bg-white dark:bg-neutral-900 px-3.5 py-1.5 font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-neutral-800 transition-colors cursor-pointer"
+        >
+          Retake Diagnostic
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Progress Bar ("You Are Here") -->
+  <div class="sticky top-18 z-30 mb-10 rounded-2xl border border-[#ebebeb] bg-white/95 p-4 shadow-sm backdrop-blur-md transition-colors dark:border-[#27272a] dark:bg-[#121215]/95">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-2.5">
+      <div class="flex items-center gap-2.5">
+        <span class="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="font-mono text-xs font-semibold uppercase tracking-wider text-[#171717] dark:text-white">
+          "You Are Here" Progress Tracker
+        </span>
+      </div>
+
+      <div class="flex items-center gap-4 font-mono text-xs text-neutral-500 dark:text-neutral-400">
+        <div>
+          <span id="mastered-count" class="font-bold text-[#171717] dark:text-white">0</span> of {totalNodes} Nodes Mastered
+        </div>
+        <span>•</span>
+        <div>
+          <span id="progress-percentage" class="font-bold text-emerald-600 dark:text-emerald-400">0%</span> Complete
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Track -->
+    <div class="h-2 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+      <div 
+        id="progress-bar-fill" 
+        class="h-full bg-emerald-500 transition-all duration-500 ease-out" 
+        style="width: 0%"
+      ></div>
+    </div>
+  </div>
+
+  <!-- Phases Stream with Visual Spine Line -->
+  <div class="relative space-y-16">
+    <!-- Vertical connector spine -->
+    <div class="absolute left-6 top-10 bottom-10 -z-10 w-0.5 bg-neutral-200 dark:bg-neutral-800 hidden md:block"></div>
+
+    {roadmap.phases.map((phase) => (
+      <section class="relative space-y-6" id={`phase-${phase.phaseNumber}`}>
+        <!-- Phase Header Marker -->
+        <div class="flex items-start gap-4">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#ebebeb] bg-white text-base font-bold font-mono text-[#171717] shadow-sm dark:border-[#27272a] dark:bg-[#121215] dark:text-white">
+            0{phase.phaseNumber}
+          </div>
+
+          <div class="pt-1">
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span class="font-mono text-xs font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
+                Phase {phase.phaseNumber}
+              </span>
+              <span class="rounded-full bg-neutral-100 dark:bg-[#18181b] dark:border dark:border-[#27272a] px-2.5 py-0.5 font-mono text-[11px] text-neutral-600 dark:text-neutral-300 font-medium">
+                {phase.badge}
+              </span>
+            </div>
+            <h3 class="font-sans text-2xl font-bold tracking-tight text-[#171717] dark:text-white">
+              {phase.title}
+            </h3>
+            <p class="text-xs text-[#4d4d4d] dark:text-[#a1a1aa] max-w-2xl mt-1">
+              {phase.subtitle}
+            </p>
+          </div>
+        </div>
+
+        <!-- The Emotional "Learner Experience" Window -->
+        <div class="md:pl-16">
+          <LearnerExperienceCard 
+            experience={phase.learnerExperience} 
+            phaseNumber={phase.phaseNumber} 
+          />
+        </div>
+
+        <!-- Nodes Grid -->
+        <div class="md:pl-16">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {phase.nodes.map((node) => (
+              <RoadmapNode node={node} roadmapSlug={roadmap.slug} />
+            ))}
+          </div>
+        </div>
+
+        <!-- Capstone Project Checkpoint (if present) -->
+        {phase.capstoneProject && (
+          <div class="md:pl-16 pt-4">
+            <div class="rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50/70 p-6 transition-all hover:border-neutral-400 hover:bg-white dark:border-neutral-700 dark:bg-[#121215]/70 dark:hover:border-neutral-600 dark:hover:bg-[#18181c]">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="rounded-full bg-[#171717] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-white uppercase tracking-wider dark:bg-white dark:text-[#09090b]">
+                    Capstone Checkpoint
+                  </span>
+                  <span class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+                    ⏱️ ~{phase.capstoneProject.estimatedHours}h Portfolio Spec
+                  </span>
+                </div>
+                <span class="font-mono text-xs text-neutral-600 dark:text-neutral-300 font-medium">
+                  {phase.capstoneProject.difficulty}
+                </span>
+              </div>
+
+              <h4 class="font-sans text-base font-bold text-[#171717] dark:text-white mb-2">
+                {phase.capstoneProject.title}
+              </h4>
+
+              <p class="text-xs leading-relaxed text-[#4d4d4d] dark:text-[#a1a1aa] mb-4">
+                {phase.capstoneProject.brief}
+              </p>
+
+              <!-- Deliverables Checklist -->
+              <div class="space-y-1.5 pt-2 border-t border-neutral-200 dark:border-[#27272a]">
+                <span class="font-mono text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider block mb-1">
+                  Required Proof-of-Competence Deliverables:
+                </span>
+                {phase.capstoneProject.deliverables.map((deliv) => (
+                  <div class="flex items-center gap-2 text-xs text-neutral-700 dark:text-neutral-300">
+                    <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>{deliv}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+    ))}
+  </div>
+
+  <!-- Drawer component attached to this roadmap tree -->
+  <NodeDrawer roadmap={roadmap} />
+</div>
+
+<!-- Client Script for Interactive Node Status & Drawer Hydration -->
+<script>
+  function setupRoadmapInteractions() {
+    const slug = document.querySelector('[data-roadmap-slug]')?.getAttribute('data-roadmap-slug') || '';
+    const storageKey = `eg_progress_${slug}`;
+
+    // Load progress from localStorage
+    let savedProgress: Record<string, 'not-started' | 'in-progress' | 'completed'> = {};
+    try {
+      savedProgress = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    } catch (e) {
+      savedProgress = {};
+    }
+
+    const nodeContainers = document.querySelectorAll('.node-container');
+    const totalCount = nodeContainers.length;
+
+    function updateProgressBar() {
+      let masteredCount = 0;
+      nodeContainers.forEach((container) => {
+        const nodeId = container.getAttribute('data-node-id') || '';
+        const currentStatus = savedProgress[nodeId] || 'not-started';
+        const indicator = container.querySelector('.status-indicator');
+        const text = container.querySelector('.status-text');
+
+        if (currentStatus === 'completed') {
+          masteredCount++;
+          container.classList.add('border-emerald-300', 'bg-emerald-50/20', 'dark:border-emerald-500/50', 'dark:bg-emerald-950/20');
+          container.classList.remove('border-blue-300', 'bg-blue-50/20', 'dark:border-blue-500/50', 'dark:bg-blue-950/20');
+          indicator?.classList.remove('bg-neutral-300', 'bg-blue-500', 'dark:bg-neutral-700');
+          indicator?.classList.add('bg-emerald-500');
+          if (text) text.textContent = 'Mastered';
+        } else if (currentStatus === 'in-progress') {
+          container.classList.add('border-blue-300', 'bg-blue-50/20', 'dark:border-blue-500/50', 'dark:bg-blue-950/20');
+          container.classList.remove('border-emerald-300', 'bg-emerald-50/20', 'dark:border-emerald-500/50', 'dark:bg-emerald-950/20');
+          indicator?.classList.remove('bg-neutral-300', 'bg-emerald-500', 'dark:bg-neutral-700');
+          indicator?.classList.add('bg-blue-500');
+          if (text) text.textContent = 'In Progress';
+        } else {
+          container.classList.remove(
+            'border-emerald-300', 'bg-emerald-50/20', 'dark:border-emerald-500/50', 'dark:bg-emerald-950/20',
+            'border-blue-300', 'bg-blue-50/20', 'dark:border-blue-500/50', 'dark:bg-blue-950/20'
+          );
+          indicator?.classList.remove('bg-emerald-500', 'bg-blue-500');
+          indicator?.classList.add('bg-neutral-300', 'dark:bg-neutral-700');
+          if (text) text.textContent = 'Not Started';
+        }
+      });
+
+      const percentage = totalCount > 0 ? Math.round((masteredCount / totalCount) * 100) : 0;
+      const countElem = document.getElementById('mastered-count');
+      const percentElem = document.getElementById('progress-percentage');
+      const fillElem = document.getElementById('progress-bar-fill');
+
+      if (countElem) countElem.textContent = masteredCount.toString();
+      if (percentElem) percentElem.textContent = `${percentage}%`;
+      if (fillElem) fillElem.style.width = `${percentage}%`;
+    }
+
+    // Toggle status button click
+    nodeContainers.forEach((container) => {
+      const toggleBtn = container.querySelector('.status-toggle-btn');
+      const nodeId = container.getAttribute('data-node-id') || '';
+
+      toggleBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const current = savedProgress[nodeId] || 'not-started';
+        let next: 'not-started' | 'in-progress' | 'completed' = 'in-progress';
+        if (current === 'not-started') next = 'in-progress';
+        else if (current === 'in-progress') next = 'completed';
+        else next = 'not-started';
+
+        savedProgress[nodeId] = next;
+        localStorage.setItem(storageKey, JSON.stringify(savedProgress));
+        updateProgressBar();
+      });
+    });
+
+    // Node drawer inspection
+    const drawerBackdrop = document.getElementById('node-drawer-backdrop');
+    const drawerPanel = document.getElementById('node-drawer-panel');
+    const closeDrawerBtn = document.getElementById('close-drawer-btn');
+    const closeSecondaryBtn = document.getElementById('drawer-close-secondary-btn');
+    const markCompleteBtn = document.getElementById('drawer-mark-complete-btn');
+
+    let activeNodeId: string | null = null;
+
+    function openDrawer(nodeId: string) {
+      activeNodeId = nodeId;
+      const allNodesData = (window as any).__ROADMAP_NODES__ || [];
+      const node = allNodesData.find((n: any) => n.id === nodeId);
+      if (!node) return;
+
+      const titleElem = document.getElementById('drawer-title');
+      const categoryElem = document.getElementById('drawer-category');
+      const hoursElem = document.getElementById('drawer-hours');
+      const diffElem = document.getElementById('drawer-difficulty-badge');
+      const statusElem = document.getElementById('drawer-status-chip');
+      const expElem = document.getElementById('drawer-explanation');
+      const resListElem = document.getElementById('drawer-resources-list');
+      const tagsElem = document.getElementById('drawer-tags');
+
+      if (titleElem) titleElem.textContent = node.title;
+      if (categoryElem) categoryElem.textContent = node.category;
+      if (hoursElem) hoursElem.textContent = `~${node.estimatedHours}h`;
+      if (diffElem) {
+        diffElem.textContent = node.difficulty;
+        diffElem.className = `rounded-full px-2.5 py-1 font-semibold border ${
+          node.difficulty === 'Beginner' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/60' :
+          node.difficulty === 'Intermediate' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/60' :
+          'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900/60'
+        }`;
+      }
+
+      const currentStatus = savedProgress[nodeId] || 'not-started';
+      if (statusElem) {
+        statusElem.textContent = `Status: ${currentStatus === 'completed' ? 'Mastered' : currentStatus === 'in-progress' ? 'In Progress' : 'Not Started'}`;
+      }
+
+      if (expElem) {
+        expElem.textContent = node.detailedExplanation;
+      }
+
+      if (resListElem) {
+        resListElem.innerHTML = node.resources.map((res: any) => `
+          <a href="${res.url}" target="_blank" rel="noopener noreferrer" class="block rounded-xl border border-neutral-200 bg-white p-3.5 hover:border-neutral-400 hover:shadow-xs transition-all no-underline group/link dark:border-[#27272a] dark:bg-[#18181b] dark:hover:border-neutral-600">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <span class="font-sans text-xs font-bold text-[#171717] dark:text-white group-hover/link:text-blue-600 dark:group-hover/link:text-blue-400 transition-colors flex items-center gap-1.5">
+                ${res.title}
+                <svg class="w-3 h-3 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </span>
+              <span class="font-mono text-[9px] rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/60 px-2 py-0.5 shrink-0 font-medium">
+                ${res.authorityTier}
+              </span>
+            </div>
+            <p class="text-[11px] leading-relaxed text-neutral-500 dark:text-neutral-400 mb-2">
+              ${res.description}
+            </p>
+            <div class="flex items-center gap-3 font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
+              <span>Type: ${res.type.toUpperCase()}</span>
+              ${res.estimatedReadHours ? `<span>• ~${res.estimatedReadHours}h study</span>` : ''}
+              <span>• 100% Free</span>
+            </div>
+          </a>
+        `).join('');
+      }
+
+      if (tagsElem) {
+        tagsElem.innerHTML = node.tags.map((tag: string) => `
+          <span class="rounded-[4px] border border-neutral-200 bg-neutral-50 px-2 py-0.5 font-mono text-[11px] text-neutral-600 dark:border-[#27272a] dark:bg-[#18181b] dark:text-neutral-300">
+            ${tag}
+          </span>
+        `).join('');
+      }
+
+      drawerBackdrop?.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        drawerBackdrop?.classList.remove('opacity-0');
+        drawerPanel?.classList.remove('translate-x-full');
+      });
+    }
+
+    function closeDrawer() {
+      drawerBackdrop?.classList.add('opacity-0');
+      drawerPanel?.classList.add('translate-x-full');
+      setTimeout(() => {
+        drawerBackdrop?.classList.add('hidden');
+      }, 300);
+    }
+
+    // Attach click to node containers and drawer triggers
+    nodeContainers.forEach((container) => {
+      const nodeId = container.getAttribute('data-node-id') || '';
+      container.addEventListener('click', () => openDrawer(nodeId));
+    });
+
+    closeDrawerBtn?.addEventListener('click', closeDrawer);
+    closeSecondaryBtn?.addEventListener('click', closeDrawer);
+    drawerBackdrop?.addEventListener('click', closeDrawer);
+
+    markCompleteBtn?.addEventListener('click', () => {
+      if (!activeNodeId) return;
+      savedProgress[activeNodeId] = 'completed';
+      localStorage.setItem(storageKey, JSON.stringify(savedProgress));
+      updateProgressBar();
+      closeDrawer();
+    });
+
+    // ----------------------------------------------------
+    // AI Skill Diagnostic Integration & Node Badging
+    // ----------------------------------------------------
+    function applyDiagnosticDecorations() {
+      let diagData: any = null;
+      try {
+        diagData = JSON.parse(localStorage.getItem('engineerguide_skill_diagnostic') || 'null');
+      } catch (e) {
+        diagData = null;
+      }
+
+      const banner = document.getElementById('diagnostic-banner');
+      const careerNameElem = document.getElementById('diag-career-name');
+      const readinessBadgeElem = document.getElementById('diag-readiness-badge');
+
+      if (!diagData) {
+        banner?.classList.add('hidden');
+        return;
+      }
+
+      if (banner) {
+        banner.classList.remove('hidden');
+        if (careerNameElem) careerNameElem.textContent = diagData.targetCareerLabel || diagData.targetCareer;
+        if (readinessBadgeElem) readinessBadgeElem.textContent = `Readiness: ${diagData.overallReadiness}%`;
+      }
+
+      const strengthsMap = new Set((diagData.strengths || []).map((s: any) => (s.skillId || s.name || '').toLowerCase()));
+      const developingMap = new Set((diagData.developing || []).map((d: any) => (d.skillId || d.name || '').toLowerCase()));
+      const gapsMap = new Set((diagData.gaps || []).map((g: any) => (g.skillId || g.name || '').toLowerCase()));
+
+      nodeContainers.forEach((container) => {
+        const nodeId = (container.getAttribute('data-node-id') || '').toLowerCase();
+        const title = (container.getAttribute('data-title') || '').toLowerCase();
+        const category = (container.getAttribute('data-category') || '').toLowerCase();
+        let tags: string[] = [];
+        try {
+          tags = JSON.parse(container.getAttribute('data-tags') || '[]').map((t: string) => t.toLowerCase());
+        } catch (e) {
+          tags = [];
+        }
+
+        const badge = container.querySelector('.diagnostic-badge');
+        if (!badge) return;
+
+        const checkMatch = (set: Set<string>) => {
+          for (const sId of set) {
+            if (!sId) continue;
+            if (nodeId.includes(sId) || sId.includes(nodeId)) return true;
+            if (title.includes(sId) || sId.includes(title)) return true;
+            if (tags.some((t: string) => t.includes(sId) || sId.includes(t))) return true;
+          }
+          return false;
+        };
+
+        if (checkMatch(gapsMap)) {
+          badge.className = 'diagnostic-badge rounded-full px-2 py-0.5 font-mono text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800';
+          badge.textContent = '🔴 Priority Gap';
+        } else if (checkMatch(developingMap)) {
+          badge.className = 'diagnostic-badge rounded-full px-2 py-0.5 font-mono text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800';
+          badge.textContent = '🟡 Developing';
+        } else if (checkMatch(strengthsMap)) {
+          badge.className = 'diagnostic-badge rounded-full px-2 py-0.5 font-mono text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800';
+          badge.textContent = '🟢 Strong';
+        }
+      });
+    }
+
+    // Initial render of progress & diagnostic badges
+    updateProgressBar();
+    applyDiagnosticDecorations();
+
+    // Listen for diagnostic events from modal
+    window.addEventListener('engineerguide:diagnostic-updated', () => {
+      applyDiagnosticDecorations();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', setupRoadmapInteractions);
+</script>

@@ -1,0 +1,350 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { allBranches, getBranchBySlug } from '../../../data/branches';
+
+export async function getStaticPaths() {
+  return allBranches
+    .filter(b => !b.hasFullRoadmap)
+    .map(b => ({ params: { slug: b.slug } }));
+}
+
+const { slug } = Astro.params;
+const branch = getBranchBySlug(slug);
+
+if (!branch) {
+  return Astro.redirect('/');
+}
+
+const resourceTypeIcon: Record<string, string> = {
+  course: '🎓',
+  book: '📖',
+  docs: '📄',
+  video: '🎬',
+  platform: '🛠️',
+};
+
+const stageColors = [
+  { bg: '#f0f9ff', border: '#bae6fd', dot: '#0ea5e9', label: 'text-sky-700' },
+  { bg: '#f0fdf4', border: '#bbf7d0', dot: '#22c55e', label: 'text-green-700' },
+  { bg: '#fefce8', border: '#fde68a', dot: '#f59e0b', label: 'text-amber-700' },
+  { bg: '#fdf4ff', border: '#f5d0fe', dot: '#a855f7', label: 'text-purple-700' },
+  { bg: '#fff1f2', border: '#fecdd3', dot: '#f43f5e', label: 'text-rose-700' },
+];
+const breadcrumbs = [
+  { name: 'Home', item: '/' },
+  { name: 'Roadmaps', item: '/roadmaps' },
+  { name: branch.name, item: `/roadmaps/overview/${branch.slug}` },
+];
+---
+
+<Layout
+  title={`${branch.name} Engineering Overview — EngineerGuide`}
+  description={`${branch.description} Overview of key stages, skills, and learning resources.`}
+  breadcrumbs={breadcrumbs}
+  noindex={true}
+>
+  <!-- Back Nav -->
+  <div class="border-b border-[#ebebeb] bg-white transition-colors dark:border-[#27272a] dark:bg-[#0c0c0e]">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3">
+      <a href="/#branches" class="flex items-center gap-2 font-mono text-sm text-neutral-500 hover:text-[#171717] dark:text-neutral-400 dark:hover:text-white transition-colors no-underline">
+        <span>←</span>
+        <span>All Branches</span>
+      </a>
+      <span class="text-neutral-300 dark:text-neutral-700">/</span>
+      <span class="font-mono text-sm text-neutral-400 dark:text-neutral-500">{branch.name}</span>
+    </div>
+  </div>
+
+  <!-- Hero Header -->
+  <section class="overview-hero border-b border-[#ebebeb] py-14 sm:py-20 transition-colors dark:border-[#27272a]" style={`background-color: ${branch.bgColor};`}>
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+        <!-- Emoji -->
+        <div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-white border border-neutral-200 text-5xl shadow-sm shrink-0 dark:bg-[#121215] dark:border-[#27272a]">
+          {branch.emoji}
+        </div>
+        <!-- Info -->
+        <div class="flex-1">
+          <span class="font-mono text-sm font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 block mb-2">
+            {branch.category === 'technology' ? 'Technology Engineering' : branch.category === 'emerging' ? 'Emerging Field' : 'Traditional Engineering'}
+          </span>
+          <h1 class="font-sans text-3xl sm:text-5xl font-extrabold tracking-[-1.5px] text-[#171717] dark:text-white mb-3">
+            {branch.name}
+          </h1>
+          <p class="text-lg text-[#4d4d4d] dark:text-[#a1a1aa] leading-relaxed max-w-2xl">
+            {branch.description}
+          </p>
+          <div class="flex flex-wrap gap-2 mt-4">
+            {branch.domains.map(d => (
+              <span class="rounded-full bg-white border border-neutral-200 px-3 py-1 font-mono text-sm text-neutral-600 dark:bg-[#18181b] dark:border-[#27272a] dark:text-neutral-300">{d}</span>
+            ))}
+          </div>
+        </div>
+        <!-- Duration badge -->
+        <div class="shrink-0 text-center rounded-2xl bg-white border border-neutral-200 px-6 py-5 shadow-sm dark:bg-[#121215] dark:border-[#27272a]">
+          <div class="font-sans text-2xl font-extrabold text-[#171717] dark:text-white">{branch.totalMonths}</div>
+          <div class="font-mono text-xs text-neutral-500 dark:text-neutral-400 mt-1">to get job-ready</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-14 space-y-16">
+
+    <!-- Visual Roadmap Timeline -->
+    <section>
+      <div class="mb-8">
+        <span class="font-mono text-sm font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 block mb-1">YOUR ROADMAP</span>
+        <h2 class="font-sans text-3xl font-extrabold tracking-[-1px] text-[#171717] dark:text-white">
+          Stage-by-stage path 🗺️
+        </h2>
+        <p class="mt-2 text-base text-[#4d4d4d] dark:text-[#a1a1aa]">
+          Click any stage to expand and see what to learn + free resources.
+        </p>
+      </div>
+
+      <!-- Timeline -->
+      <div class="relative" id="roadmap-timeline">
+        <!-- Vertical spine line -->
+        <div class="absolute left-8 top-0 bottom-0 w-px bg-neutral-200 dark:bg-neutral-800 roadmap-spine hidden sm:block"></div>
+
+        <div class="space-y-4">
+          {branch.stages.map((stage, i) => {
+            const color = stageColors[i % stageColors.length];
+            return (
+              <div class="roadmap-node-appear" style={`animation-delay: ${i * 0.15}s`}>
+                <!-- Stage Header (clickable) -->
+                <button
+                  type="button"
+                  class="stage-toggle w-full text-left group cursor-pointer"
+                  data-stage={i}
+                >
+                  <div class="flex items-start gap-4 sm:gap-6 rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6 hover:border-neutral-300 hover:shadow-sm transition-all dark:border-[#27272a] dark:bg-[#121215] dark:hover:border-neutral-600">
+                    <!-- Number dot -->
+                    <div class="flex flex-col items-center shrink-0 sm:ml-4">
+                      <div
+                        class="overview-stage-num flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold font-mono z-10 relative bg-white dark:bg-[#18181b]"
+                        style={`border-color: ${color.dot}; color: ${color.dot};`}
+                      >
+                        {stage.number}
+                      </div>
+                    </div>
+                    <!-- Content -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-3 mb-1 flex-wrap">
+                        <span
+                          class="rounded-full px-3 py-0.5 font-mono text-xs font-semibold border dark:border-[#27272a] dark:bg-[#18181b]"
+                          style={`background-color: ${color.bg}; border-color: ${color.border}; color: ${color.dot};`}
+                        >
+                          {stage.label}
+                        </span>
+                        <span class="font-mono text-xs text-neutral-400 dark:text-neutral-500">{stage.durationMonths}</span>
+                      </div>
+                      <h3 class="font-sans text-xl font-bold text-[#171717] dark:text-white flex items-center gap-2">
+                        <span>{stage.emoji}</span>
+                        <span>{stage.title}</span>
+                      </h3>
+                      <p class="mt-1 text-sm italic text-neutral-500 dark:text-neutral-400">"{stage.learnerMoment}"</p>
+                    </div>
+                    <!-- Expand arrow -->
+                    <div class="shrink-0 mt-1">
+                      <svg
+                        class="h-5 w-5 text-neutral-400 transition-transform group-[.open]:rotate-180 stage-arrow"
+                        data-arrow={i}
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
+
+                <!-- Stage Body (expandable) -->
+                <div class="stage-body" id={`stage-body-${i}`}>
+                  <div
+                    class="overview-stage-body mx-4 sm:ml-20 mr-2 mt-2 rounded-2xl border p-6 space-y-5"
+                    style={`background-color: ${color.bg}; border-color: ${color.border};`}
+                  >
+                    <!-- Topics list -->
+                    <div>
+                      <span class="font-mono text-xs font-bold uppercase tracking-wider text-neutral-500 dark:text-neutral-400 block mb-3">
+                        📚 What you'll learn
+                      </span>
+                      <ul class="space-y-2">
+                        {stage.topics.map(topic => (
+                          <li class="flex items-start gap-3 text-base text-[#4d4d4d] dark:text-[#ededed]">
+                            <span class="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0" style={`background-color: ${color.dot};`}></span>
+                            <span>{topic}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <!-- End marker -->
+        <div class="flex items-center gap-4 mt-8 sm:ml-4">
+          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#171717] text-white text-lg shrink-0 sm:ml-4 dark:bg-white dark:text-[#09090b]">
+            🏆
+          </div>
+          <div>
+            <div class="font-sans text-lg font-bold text-[#171717] dark:text-white">Job Ready!</div>
+            <div class="font-mono text-sm text-neutral-500 dark:text-neutral-400">{branch.totalMonths} of consistent learning</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Careers Section -->
+    <section>
+      <div class="mb-6">
+        <span class="font-mono text-sm font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 block mb-1">WHERE IT LEADS</span>
+        <h2 class="font-sans text-3xl font-extrabold tracking-[-1px] text-[#171717] dark:text-white">Career paths 💼</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {branch.careers.map(career => (
+          <div class="hairline-card rounded-2xl p-6 flex flex-col gap-2">
+            <span class="text-3xl">{career.emoji}</span>
+            <h3 class="font-sans text-lg font-bold text-[#171717] dark:text-white">{career.title}</h3>
+            <span class="font-mono text-sm text-neutral-500 dark:text-neutral-400">{career.salaryBand}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Free Resources Section -->
+    <section>
+      <div class="mb-6">
+        <span class="font-mono text-sm font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 block mb-1">START LEARNING TODAY</span>
+        <h2 class="font-sans text-3xl font-extrabold tracking-[-1px] text-[#171717] dark:text-white">Top free resources 🎓</h2>
+        <p class="mt-2 text-base text-[#4d4d4d] dark:text-[#a1a1aa]">100% free. No subscriptions. Direct links.</p>
+      </div>
+      <div class="space-y-3">
+        {branch.topResources.map(res => (
+          <a
+            href={res.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-4 hairline-card rounded-2xl p-5 no-underline group"
+          >
+            <span class="text-2xl shrink-0">{resourceTypeIcon[res.type] ?? '📚'}</span>
+            <div class="flex-1 min-w-0">
+              <div class="font-sans text-base font-semibold text-[#171717] group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 transition-colors truncate">
+                {res.title}
+              </div>
+              <div class="font-mono text-xs text-neutral-400 dark:text-neutral-500 mt-0.5 capitalize">{res.type} · Free</div>
+            </div>
+            <span class="font-mono text-sm text-neutral-400 group-hover:text-blue-500 dark:text-neutral-500 dark:group-hover:text-blue-400 transition-colors shrink-0">→</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Capstone Ideas Section -->
+    <section>
+      <div class="mb-6">
+        <span class="font-mono text-sm font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 block mb-1">BUILD SOMETHING REAL</span>
+        <h2 class="font-sans text-3xl font-extrabold tracking-[-1px] text-[#171717] dark:text-white">Capstone project ideas 🛠️</h2>
+        <p class="mt-2 text-base text-[#4d4d4d] dark:text-[#a1a1aa]">Portfolio-grade projects that prove you know your stuff.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {branch.capstoneideas.map((idea, i) => (
+          <div class="hairline-card rounded-2xl p-6 flex items-start gap-4">
+            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-neutral-100 font-mono text-sm font-bold text-neutral-700 dark:bg-[#18181b] dark:text-neutral-300 shrink-0">
+              {i + 1}
+            </div>
+            <p class="text-base text-[#4d4d4d] dark:text-[#a1a1aa] leading-relaxed">{idea}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Explore Other Engineering Roadmaps Section -->
+    <section class="border-t border-[#ebebeb] dark:border-[#27272a] pt-12">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+        <div>
+          <span class="font-mono text-xs font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500 block mb-1">ALL DISCIPLINES</span>
+          <h2 class="font-sans text-2xl font-extrabold text-[#171717] dark:text-white tracking-tight">
+            Explore other branch roadmaps 🧭
+          </h2>
+        </div>
+        <a 
+          href="/roadmaps" 
+          class="font-mono text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center gap-1"
+        >
+          <span>View All 26 Roadmaps Directory</span>
+          <span>→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        {allBranches.filter(b => b.slug !== branch.slug).map((b) => {
+          const href = b.hasFullRoadmap ? `/roadmaps/${b.fullRoadmapSlug}` : `/roadmaps/overview/${b.slug}`;
+          return (
+            <a
+              href={href}
+              class="flex items-center gap-2.5 rounded-xl border border-[#ebebeb] bg-white p-3 hover:border-neutral-400 hover:shadow-xs transition-all no-underline group dark:border-[#27272a] dark:bg-[#121215] dark:hover:border-neutral-600"
+            >
+              <span class="text-xl shrink-0 group-hover:scale-110 transition-transform">{b.emoji}</span>
+              <div class="min-w-0 flex-1">
+                <div class="font-sans text-xs font-bold text-[#171717] dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  {b.name}
+                </div>
+                <div class="font-mono text-[10px] text-neutral-400 dark:text-neutral-500 capitalize truncate">
+                  {b.category}
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- Bottom Nav -->
+    <div class="border-t border-[#ebebeb] dark:border-[#27272a] pt-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <a href="/roadmaps" class="rounded-full border border-[#ebebeb] bg-white px-6 py-3 font-sans text-base font-semibold text-[#171717] hover:border-neutral-400 transition-all no-underline dark:border-[#27272a] dark:bg-[#121215] dark:text-white dark:hover:border-neutral-600">
+        ← All 26 Roadmaps
+      </a>
+      <button
+        type="button"
+        class="open-personalizer-trigger rounded-full bg-[#171717] px-6 py-3 font-sans text-base font-semibold text-white hover:bg-black transition-all cursor-pointer dark:bg-white dark:text-[#09090b] dark:hover:bg-neutral-200"
+      >
+        🎯 Discover My Skill Level
+      </button>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // Stage expand / collapse
+  document.querySelectorAll('.stage-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = (btn as HTMLElement).dataset.stage;
+      const body = document.getElementById(`stage-body-${i}`);
+      const arrow = document.querySelector(`[data-arrow="${i}"]`);
+      if (!body) return;
+
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      btn.classList.toggle('open', !isOpen);
+      if (arrow) {
+        (arrow as HTMLElement).style.transform = !isOpen ? 'rotate(180deg)' : '';
+      }
+    });
+  });
+
+  // Auto-open first stage
+  const firstBody = document.getElementById('stage-body-0');
+  const firstBtn = document.querySelector('.stage-toggle');
+  if (firstBody) firstBody.classList.add('open');
+  if (firstBtn) {
+    firstBtn.classList.add('open');
+    const arrow = document.querySelector('[data-arrow="0"]');
+    if (arrow) (arrow as HTMLElement).style.transform = 'rotate(180deg)';
+  }
+</script>

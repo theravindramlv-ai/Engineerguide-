@@ -1,0 +1,270 @@
+---
+// src/pages/resources/[slug].astro
+// Individual deep-dive resource & technology learning guide
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/seo/Breadcrumbs.astro';
+import { allResources, getResourceBySlug, type ResourceTopic } from '../../data/resources';
+
+export function getStaticPaths() {
+  return allResources.map((topic) => ({
+    params: { slug: topic.slug },
+    props: { topic },
+  }));
+}
+
+interface Props {
+  topic: ResourceTopic;
+}
+
+const { topic } = Astro.props;
+
+const breadcrumbs = [
+  { name: 'Home', item: '/' },
+  { name: 'Resources', item: '/resources' },
+  { name: topic.shortName, item: `/resources/${topic.slug}` },
+];
+---
+
+<Layout
+  title={`${topic.title} | EngineerGuide`}
+  description={`Master ${topic.shortName} with canonical free resources, official documentation, core concepts, and portfolio-grade project specifications.`}
+  breadcrumbs={breadcrumbs}
+  type="article"
+  articleData={{
+    publishedTime: '2026-01-15T00:00:00Z',
+    modifiedTime: new Date().toISOString(),
+    section: topic.category,
+    tags: [topic.shortName, 'Engineering Resources', 'Free Documentation', topic.category],
+  }}
+>
+  <!-- Resource Header -->
+  <header class="relative overflow-hidden border-b border-black/8 dark:border-white/8 bg-[var(--bg-primary)] pt-14 pb-16 sm:pt-20 sm:pb-22 bg-grid-subtle transition-colors">
+    <div class="hero-radial-glow absolute inset-0 -top-20 h-[550px] w-full pointer-events-none"></div>
+
+    <div class="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-6">
+        <Breadcrumbs items={breadcrumbs} />
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <span class="inline-flex items-center gap-1.5 rounded-full border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 px-3 py-1 text-xs font-mono font-medium text-sky-600 dark:text-sky-400 shadow-xs">
+          {topic.category}
+        </span>
+        <span class="rounded-full border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-3 py-1 text-xs font-mono text-slate-600 dark:text-slate-400">
+          Difficulty: {topic.difficulty}
+        </span>
+      </div>
+
+      <h1 class="font-sans text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white leading-tight mb-4">
+        {topic.title}
+      </h1>
+
+      <p class="text-base sm:text-lg text-slate-600 dark:text-slate-400 leading-relaxed font-normal mb-8">
+        {topic.tagline}
+      </p>
+
+      <div class="p-4 rounded-xl border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider mb-1">
+            Part of the Learning Roadmap
+          </div>
+          <div class="font-sans text-sm font-bold text-slate-900 dark:text-white">
+            {topic.relatedRoadmapName}
+          </div>
+        </div>
+        <a
+          href={`/roadmaps/${topic.relatedRoadmapSlug}`}
+          class="rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 px-4 py-2 font-sans text-xs font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors no-underline text-center shrink-0"
+        >
+          View Full Roadmap →
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Deep Guide Body -->
+  <article class="bg-[var(--bg-surface)] py-14 sm:py-20 border-b border-black/8 dark:border-white/8 transition-colors">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-14">
+      
+      <!-- 1. What is it & Who should learn it -->
+      <section class="space-y-4">
+        <h2 class="font-sans text-2xl font-bold text-slate-950 dark:text-white tracking-tight">
+          What is {topic.shortName} and Why Does It Matter?
+        </h2>
+        <p class="text-base text-slate-700 dark:text-slate-300 leading-relaxed">
+          {topic.description}
+        </p>
+
+        <div class="mt-6 p-6 rounded-2xl border border-black/8 dark:border-white/8 bg-white/60 dark:bg-white/5 space-y-3">
+          <h3 class="font-sans text-sm font-bold text-slate-900 dark:text-white">
+            Target Audience & Prerequisites
+          </h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400">
+            <strong>Who should study this:</strong> {topic.whoShouldLearn}
+          </p>
+          <div>
+            <span class="text-xs font-mono uppercase tracking-wider text-slate-400 dark:text-slate-500 block mb-2">Recommended Prerequisites:</span>
+            <ul class="space-y-1 text-sm text-slate-700 dark:text-slate-300">
+              {topic.prerequisites.map((req) => (
+                <li class="flex items-center gap-2">
+                  <span class="text-sky-500">→</span>
+                  <span>{req}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Core Concepts to Master -->
+      <section class="space-y-4">
+        <h2 class="font-sans text-2xl font-bold text-slate-950 dark:text-white tracking-tight">
+          Essential Concepts to Understand
+        </h2>
+        <p class="text-sm text-slate-600 dark:text-slate-400">
+          Prioritize mental models and operational intuition over memorizing API functions. These are the core patterns evaluated in technical engineering interviews and production system design:
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          {topic.keyConcepts.map((concept, idx) => (
+            <div class="p-4 rounded-xl border border-black/8 dark:border-white/8 bg-white/80 dark:bg-white/5 flex items-start gap-3">
+              <span class="flex h-6 w-6 items-center justify-center rounded-md bg-sky-500/10 font-mono text-xs font-bold text-sky-600 dark:text-sky-400 shrink-0">
+                0{idx + 1}
+              </span>
+              <span class="font-sans text-sm font-semibold text-slate-900 dark:text-white">
+                {concept}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- 3. Official Documentation & Specifications -->
+      <section class="space-y-4">
+        <h2 class="font-sans text-2xl font-bold text-slate-950 dark:text-white tracking-tight">
+          Official Documentation & Canonical Standards
+        </h2>
+        <p class="text-sm text-slate-600 dark:text-slate-400">
+          Engineers must learn to read primary source documentation rather than relying solely on secondary summaries. The primary canonical authority for {topic.shortName} is:
+        </p>
+        <div class="p-6 rounded-2xl border border-sky-500/20 bg-sky-500/5 dark:bg-sky-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="font-sans text-base font-bold text-slate-950 dark:text-white">
+              {topic.canonicalDocs.name}
+            </h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+              {topic.canonicalDocs.description}
+            </p>
+          </div>
+          <a
+            href={topic.canonicalDocs.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 px-5 py-2.5 font-sans text-xs font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors no-underline text-center shrink-0"
+          >
+            Open Official Docs ↗
+          </a>
+        </div>
+      </section>
+
+      <!-- 4. Vetted Canonical Learning Resources -->
+      <section class="space-y-4">
+        <h2 class="font-sans text-2xl font-bold text-slate-950 dark:text-white tracking-tight">
+          Vetted Free Learning Resources
+        </h2>
+        <p class="text-sm text-slate-600 dark:text-slate-400">
+          The following courses and text references provide complete curriculums without paywalls or subscription barriers:
+        </p>
+
+        <div class="space-y-4">
+          {topic.canonicalResources.map((res) => (
+            <div class="hairline-card p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-[11px] font-semibold uppercase text-sky-600 dark:text-sky-400">
+                    {res.provider}
+                  </span>
+                  <span class="text-slate-300 dark:text-slate-700">·</span>
+                  <span class="font-mono text-[10px] text-slate-500 capitalize">
+                    {res.type}
+                  </span>
+                </div>
+                <h3 class="font-sans text-base font-bold text-slate-950 dark:text-white">
+                  {res.title}
+                </h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400 max-w-xl">
+                  {res.description}
+                </p>
+              </div>
+
+              <a
+                href={res.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 px-4 py-2 font-sans text-xs font-semibold text-slate-900 dark:text-white transition-colors no-underline text-center shrink-0 flex items-center justify-center gap-1.5"
+              >
+                <span>Access Course</span>
+                <span class="font-mono">↗</span>
+              </a>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- 5. Recommended Projects -->
+      <section class="space-y-4">
+        <h2 class="font-sans text-2xl font-bold text-slate-950 dark:text-white tracking-tight">
+          Recommended Practical Projects
+        </h2>
+        <p class="text-sm text-slate-600 dark:text-slate-400">
+          To consolidate these concepts, build projects that force you to debug edge cases and handle real data:
+        </p>
+        <div class="grid grid-cols-1 gap-4">
+          {topic.recommendedProjects.map((proj) => (
+            <div class="hairline-card p-6 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 class="font-sans text-base font-bold text-slate-950 dark:text-white mb-1">
+                  {proj.title}
+                </h3>
+                <p class="text-xs text-slate-600 dark:text-slate-400">
+                  {proj.summary}
+                </p>
+              </div>
+              <a
+                href={`/projects/${proj.projectCategorySlug}`}
+                class="font-mono text-xs font-semibold text-sky-600 dark:text-sky-400 hover:underline shrink-0 flex items-center gap-1"
+              >
+                <span>View Project Spec</span>
+                <span>→</span>
+              </a>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- 6. Next Steps & Contextual Transition -->
+      <section class="p-8 rounded-2xl border border-black/8 dark:border-white/8 bg-gradient-to-br from-black/5 to-transparent dark:from-white/5 space-y-4">
+        <h2 class="font-sans text-xl font-bold text-slate-950 dark:text-white">
+          Contextual Next Steps
+        </h2>
+        <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+          {topic.nextSteps}
+        </p>
+        <div class="pt-2 flex flex-wrap gap-4">
+          <a
+            href={`/roadmaps/${topic.relatedRoadmapSlug}`}
+            class="rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 px-5 py-2.5 font-sans text-xs font-bold hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors no-underline"
+          >
+            Follow {topic.relatedRoadmapName} →
+          </a>
+          <a
+            href="/resources"
+            class="rounded-xl border border-black/10 dark:border-white/10 bg-white/80 dark:bg-white/5 px-5 py-2.5 font-sans text-xs font-semibold text-slate-900 dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors no-underline"
+          >
+            Explore Other Topics
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </article>
+</Layout>

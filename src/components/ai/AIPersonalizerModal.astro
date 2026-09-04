@@ -1,0 +1,1016 @@
+---
+// src/components/ai/AIPersonalizerModal.astro
+// AI Skill Diagnostic Modal - Replaces shallow AI Roadmap Personalizer
+import { CAREER_OPTIONS, SKILLS_CATALOG } from '../../data/diagnostic/skills';
+import { DIAGNOSTIC_QUESTIONS } from '../../data/diagnostic/questions';
+
+// Serialized for client-side zero-latency deterministic execution
+const initialCareersJson = JSON.stringify(CAREER_OPTIONS);
+const initialQuestionsJson = JSON.stringify(DIAGNOSTIC_QUESTIONS);
+const initialSkillsCatalogJson = JSON.stringify(SKILLS_CATALOG);
+---
+
+<div 
+  id="ai-skill-diagnostic-modal" 
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-3 sm:p-4 backdrop-blur-sm hidden opacity-0 transition-opacity duration-200"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="diagnostic-modal-title"
+>
+  <div class="relative w-full max-w-3xl rounded-2xl border border-neutral-200 bg-white shadow-2xl transition-transform duration-300 scale-95 max-h-[92vh] flex flex-col overflow-hidden dark:border-neutral-800 dark:bg-[#0c0c0e]">
+    
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-neutral-100 dark:border-neutral-800/80 shrink-0 bg-neutral-50/50 dark:bg-neutral-900/30">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 border border-sky-500/20 dark:bg-sky-400/10 dark:text-sky-400 dark:border-sky-400/20 shadow-xs">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 id="diagnostic-modal-title" class="font-sans text-base sm:text-lg font-bold text-neutral-900 dark:text-white tracking-tight">
+              AI Skill Diagnostic
+            </h3>
+            <span class="rounded-full bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60 px-2 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider">
+              Practical Assessment
+            </span>
+          </div>
+          <p class="font-mono text-xs text-neutral-500 dark:text-neutral-400">
+            Identify what you actually know and find your highest-impact learning gaps
+          </p>
+        </div>
+      </div>
+
+      <button 
+        id="close-diagnostic-btn" 
+        type="button" 
+        class="rounded-lg border border-neutral-200 p-2 text-neutral-400 hover:text-neutral-700 hover:border-neutral-400 dark:border-neutral-800 dark:text-neutral-400 dark:hover:text-white dark:hover:border-neutral-600 transition-colors cursor-pointer"
+        aria-label="Close Diagnostic Modal"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Dynamic Body Scrollable Area -->
+    <div class="flex-1 overflow-y-auto p-6 sm:p-8">
+
+      <!-- ============================================== -->
+      <!-- STEP 1: TARGET CAREER SELECTION -->
+      <!-- ============================================== -->
+      <div id="diagnostic-step-1" class="space-y-6">
+        <div>
+          <span class="font-mono text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+            Step 1 of 3 — Target Goal
+          </span>
+          <h4 class="font-sans text-xl font-bold text-neutral-900 dark:text-white mt-1">
+            What are you preparing for?
+          </h4>
+          <p class="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
+            Your selection determines the relevant competencies, code predictions, and architectural scenarios assessed.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1" id="careers-grid">
+          {CAREER_OPTIONS.map((c) => (
+            <label class="career-option-card relative flex items-start gap-3.5 rounded-xl border border-neutral-200 p-3.5 hover:border-neutral-400 hover:bg-neutral-50/70 cursor-pointer transition-all has-checked:border-sky-500 has-checked:bg-sky-50/30 has-checked:ring-1 has-checked:ring-sky-500 dark:border-neutral-800 dark:hover:border-neutral-600 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+              <input 
+                type="radio" 
+                name="targetCareer" 
+                value={c.id} 
+                class="mt-1 accent-sky-600 dark:accent-sky-400" 
+                checked={c.id === 'fullstack-developer'}
+              />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-base">{c.icon}</span>
+                  <span class="font-sans text-xs font-bold text-neutral-900 dark:text-white">
+                    {c.label}
+                  </span>
+                </div>
+                <p class="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2 leading-relaxed">
+                  {c.description}
+                </p>
+              </div>
+            </label>
+          ))}
+        </div>
+
+        <div class="pt-2 flex items-center justify-between border-t border-neutral-100 dark:border-neutral-800">
+          <span class="text-xs text-neutral-400 font-mono">
+            8–10 practical questions follow
+          </span>
+          <button 
+            id="to-step-2-btn" 
+            type="button" 
+            class="rounded-xl bg-neutral-900 px-6 py-2.5 text-xs font-semibold text-white hover:bg-black transition-all cursor-pointer shadow-xs active:scale-98 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 flex items-center gap-2"
+          >
+            <span>Continue to Background</span>
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- STEP 2: CURRENT BACKGROUND CONTEXT -->
+      <!-- ============================================== -->
+      <div id="diagnostic-step-2" class="space-y-6 hidden">
+        <div>
+          <span class="font-mono text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+            Step 2 of 3 — Learner Context
+          </span>
+          <h4 class="font-sans text-xl font-bold text-neutral-900 dark:text-white mt-1">
+            Where are you currently in your journey?
+          </h4>
+          <p class="text-xs text-neutral-600 dark:text-neutral-400 mt-1">
+            <span class="font-semibold text-neutral-900 dark:text-white">Context only:</span> These answers do <strong class="underline decoration-amber-500">not</strong> dictate your skill score. Only your answers to the actual diagnostic questions determine your skill level.
+          </p>
+        </div>
+
+        <div class="space-y-5">
+          <!-- Sub-question 1: Current situation -->
+          <div>
+            <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-2.5">
+              Current Engineering Status
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <label class="flex items-center gap-3 rounded-xl border border-neutral-200 p-3 hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceLevel" value="beginner" checked class="accent-sky-600 dark:accent-sky-400" />
+                <div>
+                  <div class="text-xs font-semibold text-neutral-900 dark:text-white">Complete Beginner</div>
+                  <div class="text-[11px] text-neutral-500 dark:text-neutral-400">Starting from square one</div>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 rounded-xl border border-neutral-200 p-3 hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceLevel" value="student" class="accent-sky-600 dark:accent-sky-400" />
+                <div>
+                  <div class="text-xs font-semibold text-neutral-900 dark:text-white">Engineering Student</div>
+                  <div class="text-[11px] text-neutral-500 dark:text-neutral-400">Enrolled in CS, ECE, Mech, or STEM</div>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 rounded-xl border border-neutral-200 p-3 hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceLevel" value="self-taught" class="accent-sky-600 dark:accent-sky-400" />
+                <div>
+                  <div class="text-xs font-semibold text-neutral-900 dark:text-white">Self-Taught Developer</div>
+                  <div class="text-[11px] text-neutral-500 dark:text-neutral-400">Building projects via documentation & repos</div>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 rounded-xl border border-neutral-200 p-3 hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceLevel" value="switcher" class="accent-sky-600 dark:accent-sky-400" />
+                <div>
+                  <div class="text-xs font-semibold text-neutral-900 dark:text-white">Career Switcher</div>
+                  <div class="text-[11px] text-neutral-500 dark:text-neutral-400">Transitioning into tech from other field</div>
+                </div>
+              </label>
+
+              <label class="flex items-center gap-3 rounded-xl border border-neutral-200 p-3 hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 sm:col-span-2 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceLevel" value="professional" class="accent-sky-600 dark:accent-sky-400" />
+                <div>
+                  <div class="text-xs font-semibold text-neutral-900 dark:text-white">Working Professional</div>
+                  <div class="text-[11px] text-neutral-500 dark:text-neutral-400">Active engineer aiming for senior / specialized mastery</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Sub-question 2: Programming experience duration -->
+          <div>
+            <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-neutral-700 dark:text-neutral-300 mb-2.5">
+              Programming Experience
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <label class="flex flex-col items-center justify-center rounded-xl border border-neutral-200 p-3 text-center hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceDuration" value="none" class="sr-only" />
+                <span class="font-sans text-xs font-bold text-neutral-900 dark:text-white">None</span>
+                <span class="font-mono text-[10px] text-neutral-500">Day 1</span>
+              </label>
+
+              <label class="flex flex-col items-center justify-center rounded-xl border border-neutral-200 p-3 text-center hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceDuration" value="under-3-months" class="sr-only" />
+                <span class="font-sans text-xs font-bold text-neutral-900 dark:text-white">&lt; 3 mo</span>
+                <span class="font-mono text-[10px] text-neutral-500">Early</span>
+              </label>
+
+              <label class="flex flex-col items-center justify-center rounded-xl border border-neutral-200 p-3 text-center hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceDuration" value="3-12-months" checked class="sr-only" />
+                <span class="font-sans text-xs font-bold text-neutral-900 dark:text-white">3–12 mo</span>
+                <span class="font-mono text-[10px] text-neutral-500">Practicing</span>
+              </label>
+
+              <label class="flex flex-col items-center justify-center rounded-xl border border-neutral-200 p-3 text-center hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceDuration" value="1-2-years" class="sr-only" />
+                <span class="font-sans text-xs font-bold text-neutral-900 dark:text-white">1–2 yrs</span>
+                <span class="font-mono text-[10px] text-neutral-500">Solidifying</span>
+              </label>
+
+              <label class="flex flex-col items-center justify-center rounded-xl border border-neutral-200 p-3 text-center hover:bg-neutral-50 cursor-pointer transition-colors has-checked:border-sky-500 has-checked:bg-sky-50/30 col-span-2 sm:col-span-1 dark:border-neutral-800 dark:hover:bg-neutral-900/50 has-checked:dark:border-sky-400 has-checked:dark:bg-sky-950/20">
+                <input type="radio" name="experienceDuration" value="2-plus-years" class="sr-only" />
+                <span class="font-sans text-xs font-bold text-neutral-900 dark:text-white">2+ yrs</span>
+                <span class="font-mono text-[10px] text-neutral-500">Experienced</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-between border-t border-neutral-100 dark:border-neutral-800">
+          <button 
+            id="back-to-step-1-btn" 
+            type="button" 
+            class="text-xs font-semibold text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+          >
+            ← Change Career Target
+          </button>
+
+          <button 
+            id="start-assessment-btn" 
+            type="button" 
+            class="rounded-xl bg-sky-600 px-6 py-2.5 text-xs font-semibold text-white hover:bg-sky-500 transition-all cursor-pointer shadow-sm active:scale-98 flex items-center gap-2"
+          >
+            <span>Start Practical Diagnostic</span>
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- STEP 3: ADAPTIVE PRACTICAL SKILL TEST -->
+      <!-- ============================================== -->
+      <div id="diagnostic-step-3" class="space-y-6 hidden">
+        <!-- Progress Bar & Question Counter -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs font-mono">
+            <span id="question-progress-label" class="font-semibold text-sky-600 dark:text-sky-400">
+              Question 1 of 8
+            </span>
+            <span id="question-difficulty-badge" class="rounded-full bg-neutral-100 dark:bg-neutral-800 px-2.5 py-0.5 text-[10px] font-semibold text-neutral-600 dark:text-neutral-300 uppercase">
+              Intermediate
+            </span>
+          </div>
+
+          <div class="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
+            <div 
+              id="assessment-progress-fill" 
+              class="h-full bg-sky-500 transition-all duration-300 ease-out" 
+              style="width: 12%"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Question Card Container -->
+        <div class="rounded-2xl border border-neutral-200 bg-neutral-50/50 p-5 sm:p-6 space-y-4 dark:border-neutral-800 dark:bg-[#121215]">
+          <div class="space-y-1">
+            <span id="question-skill-pill" class="font-mono text-[10px] uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              JavaScript Fundamentals
+            </span>
+            <h5 id="question-title" class="font-sans text-base sm:text-lg font-bold text-neutral-900 dark:text-white">
+              Loading question...
+            </h5>
+            <p id="question-prompt" class="text-xs sm:text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed">
+              ...
+            </p>
+          </div>
+
+          <!-- Code Snippet Container (Hidden when not applicable) -->
+          <div id="question-code-block" class="hidden rounded-xl border border-neutral-800 bg-[#0d1117] p-4 text-xs font-mono text-neutral-200 overflow-x-auto shadow-inner">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-neutral-800/80 text-[10px] text-neutral-500">
+              <span id="code-snippet-lang">JAVASCRIPT</span>
+              <span>Code Snippet</span>
+            </div>
+            <pre><code id="code-snippet-content"></code></pre>
+          </div>
+
+          <!-- Options Container -->
+          <div class="space-y-2.5 pt-2" id="question-options-list">
+            <!-- Dynamically populated options -->
+          </div>
+        </div>
+
+        <!-- Question Controls -->
+        <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-neutral-800">
+          <button 
+            id="restart-diagnostic-btn" 
+            type="button" 
+            class="text-xs font-mono text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
+          >
+            Restart Diagnostic
+          </button>
+
+          <div class="flex items-center gap-3">
+            <button 
+              id="prev-question-btn" 
+              type="button" 
+              class="rounded-xl border border-neutral-200 px-4 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 dark:border-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+
+            <button 
+              id="next-question-btn" 
+              type="button" 
+              disabled
+              class="rounded-xl bg-neutral-900 px-6 py-2 text-xs font-semibold text-white hover:bg-black transition-all cursor-pointer shadow-xs active:scale-98 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Next Question →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- STEP 4: SKILL PROFILE & RESULT SCREEN -->
+      <!-- ============================================== -->
+      <div id="diagnostic-step-4" class="space-y-8 hidden">
+        <!-- Results Banner -->
+        <div class="rounded-2xl border border-neutral-200 bg-gradient-to-br from-neutral-50 to-white p-6 dark:border-neutral-800 dark:from-neutral-900/60 dark:to-[#121215]">
+          <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+            <div>
+              <span class="rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/60 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider">
+                Assessment Complete
+              </span>
+              <h4 class="font-sans text-2xl font-bold text-neutral-900 dark:text-white mt-1">
+                Your Engineering Skill Profile
+              </h4>
+              <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                Estimated mastery based on your diagnostic responses.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="rounded-xl border border-neutral-200 bg-white p-3 text-right dark:border-neutral-800 dark:bg-neutral-900">
+                <span class="font-mono text-[10px] uppercase text-neutral-400 block">Target Readiness</span>
+                <span id="result-readiness-percent" class="font-sans text-2xl font-extrabold text-sky-600 dark:text-sky-400">
+                  0%
+                </span>
+              </div>
+              <div class="rounded-xl border border-neutral-200 bg-white p-3 text-right dark:border-neutral-800 dark:bg-neutral-900">
+                <span class="font-mono text-[10px] uppercase text-neutral-400 block">Confidence</span>
+                <span id="result-confidence-label" class="font-mono text-sm font-bold text-neutral-700 dark:text-neutral-200">
+                  Medium
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="font-mono text-xs text-neutral-600 dark:text-neutral-300">
+            Target Career: <strong id="result-career-label" class="text-neutral-900 dark:text-white">Full-Stack Developer</strong>
+          </div>
+        </div>
+
+        <!-- Three Tier Competency Summary: Strengths / Developing / Gaps -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Strengths -->
+          <div class="rounded-xl border border-emerald-200/80 bg-emerald-50/20 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/10 space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+              <h5 class="font-sans text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+                🟢 Your Strengths
+              </h5>
+            </div>
+            <ul id="result-strengths-list" class="space-y-2 text-xs">
+              <!-- Dynamic items -->
+            </ul>
+          </div>
+
+          <!-- Developing -->
+          <div class="rounded-xl border border-amber-200/80 bg-amber-50/20 p-4 dark:border-amber-900/40 dark:bg-amber-950/10 space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+              <h5 class="font-sans text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
+                🟡 Developing
+              </h5>
+            </div>
+            <ul id="result-developing-list" class="space-y-2 text-xs">
+              <!-- Dynamic items -->
+            </ul>
+          </div>
+
+          <!-- Biggest Gaps -->
+          <div class="rounded-xl border border-rose-200/80 bg-rose-50/20 p-4 dark:border-rose-900/40 dark:bg-rose-950/10 space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+              <h5 class="font-sans text-xs font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wider">
+                🔴 Biggest Gaps
+              </h5>
+            </div>
+            <ul id="result-gaps-summary-list" class="space-y-2 text-xs">
+              <!-- Dynamic items -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- Detailed Knowledge Gap Analysis -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h5 class="font-sans text-base font-bold text-neutral-900 dark:text-white">
+              Knowledge Gap Analysis & Why It Matters
+            </h5>
+            <span class="font-mono text-xs text-neutral-400">
+              Root causes & action links
+            </span>
+          </div>
+
+          <div id="detailed-gaps-container" class="space-y-3">
+            <!-- Dynamic gap cards with prerequisites, why it matters, and direct links -->
+          </div>
+        </div>
+
+        <!-- "Don't Learn This Yet" Section -->
+        <div class="rounded-2xl border border-neutral-200 bg-neutral-50/60 p-5 dark:border-neutral-800 dark:bg-neutral-900/30 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="text-base">🚫</span>
+            <h5 class="font-sans text-sm font-bold text-neutral-900 dark:text-white uppercase tracking-wider">
+              Don't Learn This Yet
+            </h5>
+          </div>
+          <p class="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">
+            Based on your target and current foundational gaps, avoid getting distracted by these advanced topics until core prerequisites are locked in:
+          </p>
+          <div id="dont-learn-yet-container" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            <!-- Dynamic items -->
+          </div>
+        </div>
+
+        <!-- Personalized Next Move (Weekly Sprint) -->
+        <div class="rounded-2xl border-2 border-sky-500/30 bg-sky-50/30 p-6 dark:border-sky-500/30 dark:bg-sky-950/20 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🎯</span>
+              <h5 class="font-sans text-base font-bold text-neutral-900 dark:text-white">
+                Your Next Move — <span id="next-move-timeframe">This Week</span>
+              </h5>
+            </div>
+            <span id="next-move-hours" class="rounded-full bg-sky-100 text-sky-800 border border-sky-200 dark:bg-sky-900/60 dark:text-sky-200 dark:border-sky-700/60 px-3 py-1 font-mono text-xs font-semibold">
+              ⏱️ Estimated Effort: 8–10 hours
+            </span>
+          </div>
+
+          <p id="next-move-rationale" class="text-xs text-neutral-700 dark:text-neutral-300 leading-relaxed italic">
+            Rationale will appear here.
+          </p>
+
+          <div class="space-y-2 pt-2 border-t border-sky-500/20">
+            <span class="font-mono text-[11px] font-semibold text-neutral-600 dark:text-neutral-300 uppercase tracking-wider block">
+              Prioritized Milestone Sequence:
+            </span>
+            <ol id="next-move-steps-list" class="space-y-1.5 text-xs text-neutral-800 dark:text-neutral-200 list-decimal list-inside">
+              <!-- Dynamic sequence -->
+            </ol>
+          </div>
+
+          <!-- Build My Personalized Roadmap CTA Button -->
+          <div class="pt-4 flex flex-col sm:flex-row items-center gap-3">
+            <button 
+              id="build-personalized-roadmap-btn" 
+              type="button" 
+              class="w-full sm:w-auto flex-1 rounded-xl bg-sky-600 px-6 py-3.5 text-xs sm:text-sm font-bold text-white hover:bg-sky-500 transition-all shadow-md active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>Build My Personalized Roadmap</span>
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+
+            <button 
+              id="retake-assessment-btn" 
+              type="button" 
+              class="w-full sm:w-auto rounded-xl border border-neutral-300 bg-white px-5 py-3 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 transition-colors cursor-pointer"
+            >
+              Retake Diagnostic
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Embedded Data & Client Diagnostic Logic -->
+<script define:vars={{ initialCareersJson, initialQuestionsJson, initialSkillsCatalogJson }}>
+  (function() {
+    const CAREERS = JSON.parse(initialCareersJson);
+    const ALL_QUESTIONS = JSON.parse(initialQuestionsJson);
+    const SKILLS_CATALOG = JSON.parse(initialSkillsCatalogJson);
+
+    // Modal DOM Elements
+    const modal = document.getElementById('ai-skill-diagnostic-modal');
+    const closeBtn = document.getElementById('close-diagnostic-btn');
+
+    const step1 = document.getElementById('diagnostic-step-1');
+    const step2 = document.getElementById('diagnostic-step-2');
+    const step3 = document.getElementById('diagnostic-step-3');
+    const step4 = document.getElementById('diagnostic-step-4');
+
+    const toStep2Btn = document.getElementById('to-step-2-btn');
+    const backToStep1Btn = document.getElementById('back-to-step-1-btn');
+    const startAssessmentBtn = document.getElementById('start-assessment-btn');
+
+    // Test DOM Elements
+    const questionProgressLabel = document.getElementById('question-progress-label');
+    const questionDifficultyBadge = document.getElementById('question-difficulty-badge');
+    const assessmentProgressFill = document.getElementById('assessment-progress-fill');
+    const questionSkillPill = document.getElementById('question-skill-pill');
+    const questionTitle = document.getElementById('question-title');
+    const questionPrompt = document.getElementById('question-prompt');
+    const questionCodeBlock = document.getElementById('question-code-block');
+    const codeSnippetLang = document.getElementById('code-snippet-lang');
+    const codeSnippetContent = document.getElementById('code-snippet-content');
+    const questionOptionsList = document.getElementById('question-options-list');
+
+    const prevQuestionBtn = document.getElementById('prev-question-btn');
+    const nextQuestionBtn = document.getElementById('next-question-btn');
+    const restartDiagnosticBtn = document.getElementById('restart-diagnostic-btn');
+
+    // Results DOM Elements
+    const resultReadinessPercent = document.getElementById('result-readiness-percent');
+    const resultConfidenceLabel = document.getElementById('result-confidence-label');
+    const resultCareerLabel = document.getElementById('result-career-label');
+    const resultStrengthsList = document.getElementById('result-strengths-list');
+    const resultDevelopingList = document.getElementById('result-developing-list');
+    const resultGapsSummaryList = document.getElementById('result-gaps-summary-list');
+    const detailedGapsContainer = document.getElementById('detailed-gaps-container');
+    const dontLearnYetContainer = document.getElementById('dont-learn-yet-container');
+    const nextMoveTimeframe = document.getElementById('next-move-timeframe');
+    const nextMoveHours = document.getElementById('next-move-hours');
+    const nextMoveRationale = document.getElementById('next-move-rationale');
+    const nextMoveStepsList = document.getElementById('next-move-steps-list');
+    const buildPersonalizedRoadmapBtn = document.getElementById('build-personalized-roadmap-btn');
+    const retakeAssessmentBtn = document.getElementById('retake-assessment-btn');
+
+    // State Variables
+    let selectedCareerId = 'fullstack-developer';
+    let userBackground = {
+      targetCareer: 'fullstack-developer',
+      experienceLevel: 'self-taught',
+      experienceDuration: '3-12-months'
+    };
+
+    let assessmentQuestions = [];
+    let currentQuestionIndex = 0;
+    let userResponses = []; // { questionId, selectedOptionId, isCorrect }
+    let activeResult = null;
+
+    // Open/Close Modal
+    function openModal() {
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(() => {
+        modal.classList.remove('opacity-0');
+        modal.querySelector('.scale-95')?.classList.remove('scale-95');
+      });
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.add('opacity-0');
+      modal.querySelector('.scale-95')?.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 200);
+    }
+
+    // Attach listeners to all trigger buttons across the application
+    document.querySelectorAll('.open-personalizer-trigger').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+      });
+    });
+
+    closeBtn?.addEventListener('click', closeModal);
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal?.classList.contains('hidden')) closeModal();
+    });
+
+    // Step Navigation
+    function showStep(stepNum) {
+      step1?.classList.toggle('hidden', stepNum !== 1);
+      step2?.classList.toggle('hidden', stepNum !== 2);
+      step3?.classList.toggle('hidden', stepNum !== 3);
+      step4?.classList.toggle('hidden', stepNum !== 4);
+    }
+
+    toStep2Btn?.addEventListener('click', () => {
+      const selectedRadio = document.querySelector('input[name="targetCareer"]:checked');
+      if (selectedRadio) {
+        selectedCareerId = selectedRadio.value;
+        userBackground.targetCareer = selectedCareerId;
+      }
+      showStep(2);
+    });
+
+    backToStep1Btn?.addEventListener('click', () => {
+      showStep(1);
+    });
+
+    startAssessmentBtn?.addEventListener('click', () => {
+      const expLvl = document.querySelector('input[name="experienceLevel"]:checked')?.value || 'self-taught';
+      const expDur = document.querySelector('input[name="experienceDuration"]:checked')?.value || '3-12-months';
+      
+      userBackground.experienceLevel = expLvl;
+      userBackground.experienceDuration = expDur;
+
+      startDiagnosticTest();
+    });
+
+    // Initialize Question Queue Adaptively
+    function startDiagnosticTest() {
+      userResponses = [];
+      currentQuestionIndex = 0;
+
+      // Filter career questions
+      let relevant = ALL_QUESTIONS.filter(q => {
+        if (selectedCareerId === 'frontend-developer') {
+          return ['javascript', 'react', 'rest-apis', 'git-github'].includes(q.skillId);
+        } else if (selectedCareerId === 'backend-developer') {
+          return ['rest-apis', 'database-internals', 'networking-protocols', 'javascript', 'data-structures'].includes(q.skillId);
+        } else if (selectedCareerId === 'aiml-engineer' || selectedCareerId === 'data-scientist') {
+          return ['python', 'machine-learning', 'data-structures', 'git-github', 'database-internals'].includes(q.skillId);
+        } else if (selectedCareerId === 'devops-cloud-engineer' || selectedCareerId === 'cybersecurity-engineer') {
+          return ['linux-systems', 'networking-protocols', 'docker-kubernetes', 'git-github'].includes(q.skillId);
+        } else if (selectedCareerId === 'embedded-engineer' || selectedCareerId === 'electronics-engineer' || selectedCareerId === 'robotics-engineer') {
+          return ['embedded-c', 'data-structures', 'linux-systems', 'python'].includes(q.skillId);
+        } else {
+          return ['javascript', 'react', 'rest-apis', 'database-internals', 'networking-protocols', 'data-structures', 'git-github'].includes(q.skillId);
+        }
+      });
+
+      if (relevant.length < 5) {
+        relevant = ALL_QUESTIONS;
+      }
+
+      assessmentQuestions = relevant.slice(0, 10);
+      showStep(3);
+      renderCurrentQuestion();
+    }
+
+    // Render Question
+    function renderCurrentQuestion() {
+      if (!assessmentQuestions || assessmentQuestions.length === 0) return;
+
+      const q = assessmentQuestions[currentQuestionIndex];
+      const total = assessmentQuestions.length;
+
+      if (questionProgressLabel) questionProgressLabel.textContent = `Question ${currentQuestionIndex + 1} of ${total}`;
+      if (assessmentProgressFill) assessmentProgressFill.style.width = `${Math.round(((currentQuestionIndex + 1) / total) * 100)}%`;
+
+      if (questionDifficultyBadge) {
+        questionDifficultyBadge.textContent = q.difficulty;
+        questionDifficultyBadge.className = `rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase border ${
+          q.difficulty === 'beginner' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' :
+          q.difficulty === 'intermediate' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800' :
+          'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800'
+        }`;
+      }
+
+      const skillDef = SKILLS_CATALOG[q.skillId];
+      if (questionSkillPill) questionSkillPill.textContent = skillDef ? skillDef.name : q.skillId;
+      if (questionTitle) questionTitle.textContent = q.title;
+      if (questionPrompt) questionPrompt.textContent = q.prompt;
+
+      // Handle Code Snippet
+      if (q.codeSnippet && q.codeSnippet.code) {
+        questionCodeBlock?.classList.remove('hidden');
+        if (codeSnippetLang) codeSnippetLang.textContent = (q.codeSnippet.language || 'CODE').toUpperCase();
+        if (codeSnippetContent) codeSnippetContent.textContent = q.codeSnippet.code;
+      } else {
+        questionCodeBlock?.classList.add('hidden');
+      }
+
+      // Check if previously answered
+      const existingResponse = userResponses[currentQuestionIndex];
+
+      // Render options
+      if (questionOptionsList) {
+        questionOptionsList.innerHTML = q.options.map((opt) => {
+          const isSelected = existingResponse && existingResponse.selectedOptionId === opt.id;
+          return `
+            <label class="diagnostic-option-item flex items-start gap-3 rounded-xl border border-neutral-200 p-3.5 hover:border-neutral-400 hover:bg-neutral-50/70 cursor-pointer transition-all dark:border-neutral-800 dark:hover:border-neutral-600 dark:hover:bg-neutral-900/50 ${isSelected ? 'border-sky-500 bg-sky-50/40 dark:border-sky-400 dark:bg-sky-950/30 ring-1 ring-sky-500' : ''}">
+              <input 
+                type="radio" 
+                name="diagnostic-option" 
+                value="${opt.id}" 
+                class="mt-1 accent-sky-600 dark:accent-sky-400" 
+                ${isSelected ? 'checked' : ''}
+              />
+              <div class="flex-1 text-xs text-neutral-800 dark:text-neutral-200 leading-relaxed font-sans">
+                ${opt.text}
+              </div>
+            </label>
+          `;
+        }).join('');
+
+        // Wire option clicks
+        questionOptionsList.querySelectorAll('input[name="diagnostic-option"]').forEach(input => {
+          input.addEventListener('change', (e) => {
+            const selectedId = e.target.value;
+            const chosenOption = q.options.find(o => o.id === selectedId);
+            
+            userResponses[currentQuestionIndex] = {
+              questionId: q.id,
+              selectedOptionId: selectedId,
+              isCorrect: chosenOption ? chosenOption.isCorrect : false
+            };
+
+            // Highlight chosen label
+            questionOptionsList.querySelectorAll('.diagnostic-option-item').forEach(label => {
+              label.classList.remove('border-sky-500', 'bg-sky-50/40', 'dark:border-sky-400', 'dark:bg-sky-950/30', 'ring-1', 'ring-sky-500');
+            });
+            input.closest('.diagnostic-option-item')?.classList.add('border-sky-500', 'bg-sky-50/40', 'dark:border-sky-400', 'dark:bg-sky-950/30', 'ring-1', 'ring-sky-500');
+
+            if (nextQuestionBtn) {
+              nextQuestionBtn.removeAttribute('disabled');
+            }
+          });
+        });
+      }
+
+      // Update button labels
+      if (prevQuestionBtn) {
+        prevQuestionBtn.disabled = currentQuestionIndex === 0;
+      }
+      if (nextQuestionBtn) {
+        nextQuestionBtn.textContent = currentQuestionIndex === total - 1 ? 'Analyze Skill Profile →' : 'Next Question →';
+        nextQuestionBtn.disabled = !existingResponse;
+      }
+    }
+
+    // Previous button
+    prevQuestionBtn?.addEventListener('click', () => {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        renderCurrentQuestion();
+      }
+    });
+
+    // Next button
+    nextQuestionBtn?.addEventListener('click', () => {
+      if (currentQuestionIndex < assessmentQuestions.length - 1) {
+        currentQuestionIndex++;
+        renderCurrentQuestion();
+      } else {
+        finishAssessment();
+      }
+    });
+
+    restartDiagnosticBtn?.addEventListener('click', () => {
+      showStep(1);
+    });
+
+    // Compute Skill Profile Results Deterministically
+    function finishAssessment() {
+      const career = CAREERS.find(c => c.id === selectedCareerId) || CAREERS[0];
+      const skillStats = {};
+
+      // Initialize stats
+      career.coreSkillIds.forEach(id => {
+        skillStats[id] = { correct: 0, total: 0, maxDiff: 0 };
+      });
+
+      userResponses.forEach(r => {
+        const q = ALL_QUESTIONS.find(item => item.id === r.questionId);
+        if (!q) return;
+        if (!skillStats[q.skillId]) {
+          skillStats[q.skillId] = { correct: 0, total: 0, maxDiff: 0 };
+        }
+        skillStats[q.skillId].total += 1;
+        if (r.isCorrect) {
+          skillStats[q.skillId].correct += 1;
+          const diff = q.difficulty === 'advanced' ? 3 : q.difficulty === 'intermediate' ? 2 : 1;
+          if (diff > skillStats[q.skillId].maxDiff) skillStats[q.skillId].maxDiff = diff;
+        }
+      });
+
+      const strengths = [];
+      const developing = [];
+      const gaps = [];
+
+      let totalScoreWeight = 0;
+      let totalWeight = 0;
+
+      for (const [skillId, stat] of Object.entries(skillStats)) {
+        const def = SKILLS_CATALOG[skillId];
+        const name = def ? def.name : skillId;
+        let mastery = 20;
+
+        if (stat.total > 0) {
+          const acc = stat.correct / stat.total;
+          if (acc === 1.0) mastery = stat.maxDiff >= 2 ? 88 : 72;
+          else if (acc >= 0.5) mastery = 52 + (stat.maxDiff * 5);
+          else mastery = 30;
+        }
+
+        let band = 'Unfamiliar';
+        if (mastery >= 81) band = 'Strong';
+        else if (mastery >= 61) band = 'Proficient';
+        else if (mastery >= 41) band = 'Developing';
+        else if (mastery >= 21) band = 'Beginner';
+
+        const item = { skillId, name, mastery, band, def };
+
+        if (band === 'Strong' || band === 'Proficient') {
+          strengths.push(item);
+        } else if (band === 'Developing') {
+          developing.push(item);
+        } else {
+          gaps.push(item);
+        }
+
+        totalScoreWeight += mastery * (career.coreSkillIds.includes(skillId) ? 1.5 : 1.0);
+        totalWeight += career.coreSkillIds.includes(skillId) ? 1.5 : 1.0;
+      }
+
+      const overallReadiness = Math.round(totalScoreWeight / (totalWeight || 1));
+      const confidence = userResponses.length >= 8 ? 'High' : 'Medium';
+
+      // Assemble Active Result Object
+      activeResult = {
+        completedAt: new Date().toISOString(),
+        targetCareer: selectedCareerId,
+        targetCareerLabel: career.label,
+        overallReadiness,
+        overallConfidence: confidence,
+        strengths,
+        developing,
+        gaps,
+        primaryRoadmapSlug: career.primaryRoadmapSlug || 'fullstack-systems'
+      };
+
+      // Save to localStorage
+      try {
+        localStorage.setItem('engineerguide_skill_diagnostic', JSON.stringify(activeResult));
+      } catch (e) {
+        console.warn('Could not save diagnostic to localStorage', e);
+      }
+
+      // Render Results Screen
+      if (resultReadinessPercent) resultReadinessPercent.textContent = `${overallReadiness}%`;
+      if (resultConfidenceLabel) resultConfidenceLabel.textContent = confidence;
+      if (resultCareerLabel) resultCareerLabel.textContent = career.label;
+
+      // Render Strengths
+      if (resultStrengthsList) {
+        resultStrengthsList.innerHTML = strengths.length > 0 
+          ? strengths.map(s => `
+            <li class="flex items-center justify-between py-1 border-b border-emerald-100 dark:border-emerald-900/30">
+              <span class="font-medium text-neutral-800 dark:text-neutral-200">${s.name}</span>
+              <span class="font-mono text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">${s.mastery}%</span>
+            </li>
+          `).join('')
+          : '<li class="text-neutral-400 italic py-1">No core skills yet assessed at proficient level.</li>';
+      }
+
+      // Render Developing
+      if (resultDevelopingList) {
+        resultDevelopingList.innerHTML = developing.length > 0
+          ? developing.map(d => `
+            <li class="flex items-center justify-between py-1 border-b border-amber-100 dark:border-amber-900/30">
+              <span class="font-medium text-neutral-800 dark:text-neutral-200">${d.name}</span>
+              <span class="font-mono text-[11px] font-semibold text-amber-700 dark:text-amber-300">${d.mastery}%</span>
+            </li>
+          `).join('')
+          : '<li class="text-neutral-400 italic py-1">All assessed skills are either mastered or priority gaps.</li>';
+      }
+
+      // Render Gaps Summary
+      if (resultGapsSummaryList) {
+        resultGapsSummaryList.innerHTML = gaps.length > 0
+          ? gaps.map(g => `
+            <li class="flex items-center justify-between py-1 border-b border-rose-100 dark:border-rose-900/30">
+              <span class="font-medium text-neutral-800 dark:text-neutral-200">${g.name}</span>
+              <span class="font-mono text-[11px] font-semibold text-rose-700 dark:text-rose-300">${g.band}</span>
+            </li>
+          `).join('')
+          : '<li class="text-emerald-600 font-medium py-1">No critical gaps detected for this career target!</li>';
+      }
+
+      // Render Detailed Knowledge Gaps
+      if (detailedGapsContainer) {
+        detailedGapsContainer.innerHTML = gaps.map(g => {
+          const def = g.def || {};
+          const prereqNames = (def.prerequisiteSkillIds || []).map(pId => SKILLS_CATALOG[pId]?.name || pId).join(', ');
+          
+          return `
+            <div class="rounded-xl border border-neutral-200 bg-white p-4 space-y-3 dark:border-neutral-800 dark:bg-[#151518]">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-100 dark:border-neutral-800 pb-2">
+                <div class="flex items-center gap-2">
+                  <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+                  <h6 class="font-sans text-xs font-bold text-neutral-900 dark:text-white">${g.name}</h6>
+                </div>
+                <div class="flex items-center gap-2 font-mono text-[11px]">
+                  <span class="text-neutral-400">Current: <span class="text-rose-600 dark:text-rose-400 font-semibold">${g.band}</span></span>
+                  <span class="text-neutral-300">•</span>
+                  <span class="text-neutral-400">Target: <span class="text-emerald-600 dark:text-emerald-400 font-semibold">Proficient</span></span>
+                </div>
+              </div>
+
+              <div>
+                <span class="font-mono text-[10px] uppercase tracking-wider text-neutral-400 block mb-1 font-semibold">Why this matters:</span>
+                <p class="text-xs text-neutral-600 dark:text-neutral-300 leading-relaxed">
+                  ${def.whyItMatters || 'Essential building block for technical fluency and job readiness.'}
+                </p>
+              </div>
+
+              ${prereqNames ? `
+                <div class="text-[11px] text-neutral-500 font-mono">
+                  <span class="font-semibold text-neutral-700 dark:text-neutral-300">Prerequisites:</span> ${prereqNames}
+                </div>
+              ` : ''}
+
+              <div class="rounded-lg bg-neutral-50 p-3 border border-neutral-100 space-y-2 dark:bg-neutral-900/60 dark:border-neutral-800/80">
+                <div class="flex items-start justify-between gap-2">
+                  <div>
+                    <span class="font-mono text-[10px] font-semibold text-sky-600 dark:text-sky-400 uppercase tracking-wider block">
+                      Recommended Next Step:
+                    </span>
+                    <p class="text-xs font-medium text-neutral-800 dark:text-neutral-200 mt-0.5">
+                      ${def.recommendedNextStep || 'Review core specifications and build an incremental prototype.'}
+                    </p>
+                  </div>
+                  ${def.resourceSlug ? `
+                    <a href="/resources/${def.resourceSlug}" target="_blank" class="shrink-0 inline-flex items-center gap-1 rounded-md bg-white border border-neutral-200 px-2.5 py-1 text-[11px] font-mono font-medium text-neutral-700 hover:text-sky-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:text-sky-400 transition-colors">
+                      Study Docs →
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Don't Learn Yet
+      if (dontLearnYetContainer) {
+        const advancedSkills = (career.advancedSkillIds || []).map(id => SKILLS_CATALOG[id]).filter(Boolean);
+        dontLearnYetContainer.innerHTML = advancedSkills.map(adv => `
+          <div class="rounded-xl border border-neutral-200 bg-white p-3 space-y-1 dark:border-neutral-800 dark:bg-[#121215]">
+            <span class="font-sans text-xs font-bold text-neutral-800 dark:text-neutral-200 block">
+              ${adv.name}
+            </span>
+            <p class="text-[11px] text-neutral-500 leading-relaxed">
+              These topics may become useful later, but they are not the highest-impact skills for your current goal.
+            </p>
+          </div>
+        `).join('');
+      }
+
+      // Render Next Move
+      const primaryGap = gaps[0] || developing[0] || { name: 'Full-Stack Systems Architecture', def: {} };
+      if (nextMoveTimeframe) nextMoveTimeframe.textContent = 'This Week';
+      if (nextMoveHours) nextMoveHours.textContent = '⏱️ Estimated Effort: 8–10 hours';
+      if (nextMoveRationale) {
+        nextMoveRationale.textContent = `You already have foundational context in your strengths. ${primaryGap.name} is currently your highest-impact gap to unlock ${career.label} competence.`;
+      }
+
+      if (nextMoveStepsList) {
+        nextMoveStepsList.innerHTML = `
+          <li>Study foundational concepts for ${primaryGap.name} using canonical guides.</li>
+          <li>Implement incremental code exercises and verify edge-case error handling.</li>
+          <li>Build a small hands-on feature or service proving conceptual retention.</li>
+          <li>Connect the feature into your portfolio project and review architectural trade-offs.</li>
+        `;
+      }
+
+      showStep(4);
+    }
+
+    // "Build My Personalized Roadmap" CTA
+    buildPersonalizedRoadmapBtn?.addEventListener('click', () => {
+      if (!activeResult) return;
+
+      // Broadcast event so any active roadmap page decorates immediately
+      window.dispatchEvent(new CustomEvent('engineerguide:diagnostic-updated', { detail: activeResult }));
+
+      // Navigate to the target roadmap
+      const targetUrl = `/roadmaps/${activeResult.primaryRoadmapSlug}`;
+      closeModal();
+
+      // If already on that roadmap, smooth scroll to roadmap tree
+      if (window.location.pathname.includes(activeResult.primaryRoadmapSlug)) {
+        const treeElem = document.querySelector('.roadmap-tree-wrapper, #phase-1');
+        treeElem?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.href = targetUrl;
+      }
+    });
+
+    retakeAssessmentBtn?.addEventListener('click', () => {
+      showStep(1);
+    });
+
+  })();
+</script>
